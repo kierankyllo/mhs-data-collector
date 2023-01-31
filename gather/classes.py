@@ -14,7 +14,7 @@ import itertools
 # TODO: Build function to push to DB
 
 
-class Sub:
+class Gather:
     """
     Class object representing a subreddit
     Keyword arguments:

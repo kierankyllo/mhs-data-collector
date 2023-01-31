@@ -63,7 +63,7 @@ class Inference_task(models.Model):
                                     help_text="The status of the task")
 
     def __str__(self):
-        if (self.start_time):
+        if (self.start_sched):
             return f"Inference job scheduled: {self.start_sched}"
  
 
