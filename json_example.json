@@ -1,0 +1,94 @@
+{
+    "mods": {},
+    "authors": {
+        "Damnthatsinteresting": 1,
+        "interestingasfuck": 1,
+        "WhitePeopleTwitter": 1,
+        "AmItheAsshole": 1
+    }
+}
+{
+    "mods": {
+        "Damnthatsinteresting": 1
+    },
+    "authors": {
+        "Damnthatsinteresting": 1,
+        "interestingasfuck": 1
+    }
+}
+{
+    "mods": {
+        "pics": 1,
+        "LivestreamFail": 1,
+        "interestingasfuck": 1,
+        "WhitePeopleTwitter": 1,
+        "AmItheAsshole": 1
+    },
+    "authors": {
+        "pics": 1,
+        "Damnthatsinteresting": 2,
+        "interestingasfuck": 1,
+        "WhitePeopleTwitter": 1,
+        "therewasanattempt": 3,
+        "AmItheAsshole": 1
+    }
+}
+{
+    "mods": {
+        "WhitePeopleTwitter": 1
+    },
+    "authors": {
+        "Damnthatsinteresting": 2,
+        "WhitePeopleTwitter": 2,
+        "therewasanattempt": 5
+    }
+}
+{
+    "mods": {},
+    "authors": {
+        "interestingasfuck": 3,
+        "WhitePeopleTwitter": 1,
+        "therewasanattempt": 1
+    }
+}
+{
+    "mods": {
+        "interestingasfuck": 1,
+        "WhitePeopleTwitter": 1,
+        "AmItheAsshole": 1
+    },
+    "authors": {
+        "interestingasfuck": 1,
+        "WhitePeopleTwitter": 1,
+        "therewasanattempt": 1
+    }
+}
+{
+    "mods": {
+        "WhitePeopleTwitter": 2,
+        "AmItheAsshole": 2
+    },
+    "authors": {
+        "WhitePeopleTwitter": 2,
+        "therewasanattempt": 2,
+        "AmItheAsshole": 1
+    }
+}
+{
+    "mods": {
+        "AmItheAsshole": 3
+    },
+    "authors": {
+        "therewasanattempt": 2
+    }
+}
+{
+    "mods": {},
+    "authors": {
+        "AmItheAsshole": 1
+    }
+}
+{
+    "mods": {},
+    "authors": {}
+}
