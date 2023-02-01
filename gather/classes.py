@@ -227,15 +227,45 @@ class Gather:
         """Returns a python set of moderators"""
         return self.__mod_set
 
-class Matrix:
+class Task_manager():
     '''
-    Class object representing a matrix of n x n subs.
-
-    Accepts an ordered list of Sub objects and calculates the intersection of their respective set attributes
     '''
-    def __init__(self, sub_list):
-        self.__list = sub_list
-    pass
+    def __init__(self, task_object, api_url, api_key, praw_object, chunk_size=100):
+        # private parameter members
+        self.__task = task_object
+        self.__subreddit_set = self.__task.subreddit_set
+        self.__pk = self.__task.pk
+        self.__url = api_url
+        self.__apikey = api_key
+        self.__praw = praw_object
+        self.__chunk_size = chunk_size
+        self.__Gather_list = []
+        self.__subreddit_list = []
+        self.__dims = len(self.__Gather_list)
+        self.__build_Gather_lists()
+    
+    # defines a function to build a list of Gather objects
+    def __build_Gather_lists(self):
+        for sub in self.__subreddit_set:            
+            sample = Gather(sub, self.__url, self.__apikey, self.__praw,    scope=self.__task.time_scale, 
+                                                                            min_words=self.__task.min_words, 
+                                                                            inference=False, 
+                                                                            forest_width=self.__task.forest_width, 
+                                                                            per_post_n=self.__task.per_post_n, 
+                                                                            comments_n=self.__task.comments_n, 
+                                                                            chunk_size=self.__chunk_size
+                                                        )
+            self.__Gather_list.append(sample)
+            self.__subreddit_list.append(sample.name)
+    
+    # defines a funtion to build the JSON edges object, JSON are just dicts of strings / ints
+    def __build_Matrix(self):
+        for gather in self.__Gather_list:
+            pass        
+    
+    # accessor functions
+    def gather_list(self):
+        return self.__Gather_list
 
 
 
