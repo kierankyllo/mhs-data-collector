@@ -9,6 +9,7 @@ import datetime
 import pytz
 import numpy
 import itertools
+import random
 
 sys.path.append('/home/kyllo/projects/gather_bot/gather')
 os.environ['DJANGO_SETTINGS_MODULE'] = 'mysite.settings'
@@ -178,16 +179,23 @@ class Task_manager():
         return self.__edges_list
 
 # fetch a list of subreddits
-SUBS_N = 100
+SUBS_N = 10
 
 # when is now in regina
 now = datetime.datetime.now(pytz.timezone('America/Regina'))
 
-# make an empty lists
-sub_list = []
+# make an empty list
+biglist = []
 
-for subreddit in reddit.subreddits.popular(limit=SUBS_N):
-    sub_list.append(subreddit.display_name)
+# fetch all the subreddits you can
+for subreddit in reddit.subreddits.popular(limit=None):
+    biglist.append(subreddit.display_name)
+
+# build a random nonrepeating sample of the list
+sublist = random.sample(biglist, SUBS_N)
+
+# print(len(biglist))
+# print(len(sublist))
 
 # create a dummy inference task for testing and push to db
 task = Inference_task(      start_sched=now,
@@ -196,7 +204,7 @@ task = Inference_task(      start_sched=now,
                             forest_width=1,
                             per_post_n=1000,
                             comments_n=500,
-                            subreddit_set=sub_list,
+                            subreddit_set=sublist,
                             status='0',                          
                             
                             )

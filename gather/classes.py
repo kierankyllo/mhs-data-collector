@@ -182,12 +182,13 @@ class Gather:
     def __build_stats(self):
         arr = np.array(self.__results)
         timestamp = datetime.datetime.now()
-        self.__stats = {
-            'min': arr.min(),
-            'max': arr.max(),
-            'mean': arr.mean(),
-            'std': arr.std(),
-            'timestamp' : timestamp
+        if len(arr) != 0:
+            self.__stats = {
+                'min': arr.min(),
+                'max': arr.max(),
+                'mean': arr.mean(),
+                'std': arr.std(),
+                'timestamp' : timestamp
         }
     
     # defines a convenience function to run inference after the object already exists or if it was created with inference=False
