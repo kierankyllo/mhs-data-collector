@@ -5,8 +5,6 @@ import sys
 import django
 import datetime
 import pytz
-import numpy
-import itertools
 import random
 
 sys.path.append('/home/kyllo/projects/gather_bot/gather')
@@ -43,36 +41,38 @@ reddit.read_only = False
 # when is now in regina
 now = datetime.datetime.now(pytz.timezone('America/Regina'))
 
-#fetch a list of subreddits
-SUBS_N = 100
+# #fetch a list of subreddits
+# SUBS_N = 1
 
-# make an empty list
-biglist = []
+# # make an empty list
+# biglist = []
 
-# fetch all the subreddits you can
-for subreddit in reddit.subreddits.popular(limit=None):
-    biglist.append(subreddit.display_name)
+# # fetch all the subreddits you can
+# for subreddit in reddit.subreddits.popular(limit=None):
+#     biglist.append(subreddit.display_name)
 
-# build a random nonrepeating sample of the list
-sublist = random.sample(biglist, SUBS_N)
+# # build a random nonrepeating sample of the list
+# sublist = random.sample(biglist, SUBS_N)
 
 # sublist = ['rpcs3', 'BingQuizAnswers', 'subnautica']
+sublist = ['programming','rpcs3', 'subnautica']
+
 
 # create a dummy inference task for testing and push to db
-task = Inference_task(      start_sched=now,
-                            time_scale = 'week',
-                            min_words=1,
-                            forest_width=1,
-                            per_post_n=1000,
-                            comments_n=500,
-                            subreddit_set=sublist,
-                            status='0',                          
+task_out = Inference_task(      start_sched=now,
+                                time_scale = 'week',
+                                min_words=1,
+                                forest_width=1,
+                                per_post_n=1000,
+                                comments_n=100,
+                                subreddit_set=sublist,
+                                status='0',                          
                             
                             )
-task.save()
+task_out.save()
 
-# fetch the dummy task record using a simplistic method 'latest'
-task = Inference_task.objects.latest('start_sched')
+# fetch the dummy task record from db using a simplistic method 'latest'
+task_in = Inference_task.objects.latest('start_sched')
 
 # pass the task to the Task manager class object to construct the Gather list
-gathers = Task_manager(task, api_url, api_key, reddit)
+gathers = Task_manager(task_in, api_url, api_key, reddit)
