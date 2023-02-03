@@ -6,7 +6,7 @@ This is the initial State of the service
 ## TODO:
 
 * Add methods to push to sqlite database tables on inference - PASS
-* Add methods to consume list of Gather objects and create edge objects
+* Add methods to consume list of Gather objects and create edge objects - PASS
 * First Full Test Script Run
 * Add error handling
 * Dockerize App
