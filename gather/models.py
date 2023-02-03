@@ -7,10 +7,11 @@ DONE:
 - Check ERD for correctness, https://drawsql.app/teams/kyllo-brooks-digital-services/diagrams/reddit-mhs-erd-2
 - Update all classes to ERD spec
 - Test migrations (PASSED in SqLite)
-TODO:
 - Queries to push to the database should serve as adequate testing
 - Freeze this code and push from gather service into test db using these classes
+TODO:
 - Run test queries and iterate
+
 LAST: 
 - Docstrings
 - Database Wipe
