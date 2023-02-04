@@ -2,6 +2,6 @@ keys.json
 *.ipynb
 __pycache__/
 db.sqlite3
-cloud_sql_proxy
+cloud_sql_proxy*
 htmlcov
 .coverage

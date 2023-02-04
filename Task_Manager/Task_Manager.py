@@ -1,14 +1,7 @@
-from gather.models import Subreddit, Subreddit_result, Subreddit_mod, Comment_result
 from tqdm import tqdm
-import Gather
+from .Get_Subreddit import Get_Subreddit
 import json
-import sys
-import os
-import django
-
-sys.path.append('/home/kyllo/projects/gather_bot/gather')
-os.environ['DJANGO_SETTINGS_MODULE'] = 'mysite.settings'
-django.setup()
+from gather.models import Subreddit, Subreddit_result, Subreddit_mod, Comment_result
 
 # TODO: build test scripts for the class
 # TODO: debug using 'issues' workflow
@@ -41,14 +34,14 @@ class Task_Manager():
     # defines a function to build a list of Gather objects
     def __build_Gather_lists(self):
         for sub in self.__subreddit_set:
-            sample = Gather(sub, self.__url, self.__apikey, self.__praw,    scope=self.__task.time_scale,
-                            min_words=self.__task.min_words,
-                            inference=True,
-                            forest_width=self.__task.forest_width,
-                            per_post_n=self.__task.per_post_n,
-                            comments_n=self.__task.comments_n,
-                            chunk_size=self.__chunk_size
-                            )
+            sample = Get_Subreddit(sub, self.__url, self.__apikey, self.__praw,    scope=self.__task.time_scale,
+                                   min_words=self.__task.min_words,
+                                   inference=True,
+                                   forest_width=self.__task.forest_width,
+                                   per_post_n=self.__task.per_post_n,
+                                   comments_n=self.__task.comments_n,
+                                   chunk_size=self.__chunk_size
+                                   )
             # only append gather objects containing samples
             # could also be used to drop gather objects with samples less than comments_n if we want
             if len(sample.samples()) != 0:

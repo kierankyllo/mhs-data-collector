@@ -3,14 +3,11 @@ import requests
 from tqdm import tqdm
 import re
 import json
-import sys
-import os
-import django
 import datetime
 
-sys.path.append('/home/kyllo/projects/gather_bot/gather')
-os.environ['DJANGO_SETTINGS_MODULE'] = 'mysite.settings'
-django.setup()
+# sys.path.append('/home/kyllo/projects/gather_bot/gather')
+# os.environ['DJANGO_SETTINGS_MODULE'] = 'mysite.settings'
+# django.setup()
 
 
 # TODO: build test scripts for the class
@@ -18,7 +15,7 @@ django.setup()
 # TODO: add error handling code
 # TODO: docstrings and code formatting compliance
 
-class Gather:
+class Get_Subreddit:
     """
     Class object representing a subreddit
     Keyword arguments:
