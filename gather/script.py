@@ -1,18 +1,15 @@
+from gatherClasses import Task_Manager
+from gather.models import Inference_task
 import os
 import json
 import praw
 import sys
 import django
 import datetime
-import pytz
-import random
 
 sys.path.append('/home/kyllo/projects/gather_bot/gather')
 os.environ['DJANGO_SETTINGS_MODULE'] = 'mysite.settings'
 django.setup()
-
-from gather.models import Subreddit, Inference_task, Subreddit_result, Subreddit_mod, Comment_result
-from classes import Gather, Task_manager
 
 
 # fetch the secrets from the keyfile
@@ -28,9 +25,9 @@ api_url = "https://kyllobrooks.com/api/mhs"
 
 # fetch and construct praw object
 reddit = praw.Reddit(
-    client_id = keys['client_id'],
-    client_secret = keys['client_secret'],
-    password = keys['password'],
+    client_id=keys['client_id'],
+    client_secret=keys['client_secret'],
+    password=keys['password'],
     user_agent="web:mhs-crawler-bot:v1 (by /u/mhs-crawler-bot)",
     username="mhs-crawler-bot",
 )
@@ -55,24 +52,24 @@ now = datetime.datetime.now(pytz.timezone('America/Regina'))
 # sublist = random.sample(biglist, SUBS_N)
 
 # sublist = ['rpcs3', 'BingQuizAnswers', 'subnautica']
-sublist = ['programming','rpcs3', 'subnautica']
+sublist = ['programming', 'rpcs3', 'subnautica']
 
 
 # create a dummy inference task for testing and push to db
-task_out = Inference_task(      start_sched=now,
-                                time_scale = 'week',
-                                min_words=1,
-                                forest_width=1,
-                                per_post_n=1000,
-                                comments_n=100,
-                                subreddit_set=sublist,
-                                status='0',                          
-                            
-                            )
+task_out = Inference_task(start_sched=now,
+                          time_scale='week',
+                          min_words=1,
+                          forest_width=1,
+                          per_post_n=1000,
+                          comments_n=100,
+                          subreddit_set=sublist,
+                          status='0',
+
+                          )
 task_out.save()
 
 # fetch the dummy task record from db using a simplistic method 'latest'
 task_in = Inference_task.objects.latest('start_sched')
 
 # pass the task to the Task manager class object to construct the Gather list
-gathers = Task_manager(task_in, api_url, api_key, reddit)
+gathers = Task_Manager(task_in, api_url, api_key, reddit)
