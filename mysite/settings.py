@@ -77,14 +77,17 @@ WSGI_APPLICATION = 'mysite.wsgi.application'
 DATABASES = {
     'default': {
 
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'mhs-init',
         'USER': 'agent',
         'PASSWORD': 'Tempa$$',
         'HOST': 'localhost',
         'PORT': '5432',
-    }
-    }   
+        'TEST': {
+            'NAME': 'test-mhs-init',
+        }
+    },
+}
 
 # DATABASES = {
 #         'default': {

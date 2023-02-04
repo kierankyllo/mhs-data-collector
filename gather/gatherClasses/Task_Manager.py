@@ -1,6 +1,5 @@
 from gather.models import Subreddit, Subreddit_result, Subreddit_mod, Comment_result
 from tqdm import tqdm
-import Gather
 import json
 import sys
 import os
