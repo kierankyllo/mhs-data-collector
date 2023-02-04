@@ -82,7 +82,7 @@ DATABASES = {
         'USER': 'agent',
         'PASSWORD': 'Tempa$$',
         'HOST': 'localhost',
-        'PORT': '5433',
+        'PORT': '5432',
         'TEST': {
             'NAME': 'mhs-test',
         }
