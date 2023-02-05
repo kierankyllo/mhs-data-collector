@@ -41,21 +41,21 @@ def main():
 
     # when is now in regina
     now = datetime.datetime.now(pytz.timezone('America/Regina'))
-    future = now + datetime.timedelta(minutes=5)
-    past = now - datetime.timedelta(minutes=5)
+    # future = now + datetime.timedelta(minutes=5)
+    # past = now - datetime.timedelta(minutes=5)
 
-    # #fetch a list of subreddits
-    # SUBS_N = 1
+    # # #fetch a list of subreddits
+    # # SUBS_N = 1
 
-    # # make an empty list
-    # biglist = []
+    # # # make an empty list
+    # # biglist = []
 
-    # # fetch all the subreddits you can
-    # for subreddit in reddit.subreddits.popular(limit=None):
-    #     biglist.append(subreddit.display_name)
+    # # # fetch all the subreddits you can
+    # # for subreddit in reddit.subreddits.popular(limit=None):
+    # #     biglist.append(subreddit.display_name)
 
-    # # build a random nonrepeating sample of the list
-    # sublist = random.sample(biglist, SUBS_N)
+    # # # build a random nonrepeating sample of the list
+    # # sublist = random.sample(biglist, SUBS_N)
 
     sublist = ['programming', 'rpcs3', 'subnautica']
 
@@ -72,31 +72,31 @@ def main():
                               )
     task_out.save()
 
-        # create a dummy inference task for testing and push to db
-    task_out = Inference_task(start_sched=past,
-                              time_scale='week',
-                              min_words=1,
-                              forest_width=1,
-                              per_post_n=1000,
-                              comments_n=100,
-                              subreddit_set=sublist,
-                              status='0',
+    #     # create a dummy inference task for testing and push to db
+    # task_out = Inference_task(start_sched=past,
+    #                           time_scale='week',
+    #                           min_words=1,
+    #                           forest_width=1,
+    #                           per_post_n=1000,
+    #                           comments_n=100,
+    #                           subreddit_set=sublist,
+    #                           status='0',
 
-                              )
-    task_out.save()
+    #                           )
+    # task_out.save()
 
-        # create a dummy inference task for testing and push to db
-    task_out = Inference_task(start_sched=future,
-                              time_scale='week',
-                              min_words=1,
-                              forest_width=1,
-                              per_post_n=1000,
-                              comments_n=100,
-                              subreddit_set=sublist,
-                              status='0',
+    #     # create a dummy inference task for testing and push to db
+    # task_out = Inference_task(start_sched=future,
+    #                           time_scale='week',
+    #                           min_words=1,
+    #                           forest_width=1,
+    #                           per_post_n=1000,
+    #                           comments_n=100,
+    #                           subreddit_set=sublist,
+    #                           status='0',
 
-                              )
-    task_out.save()
+    #                           )
+    # task_out.save()
 
 
 

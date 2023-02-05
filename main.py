@@ -10,6 +10,7 @@ import time
 #TODO: incorporate into testing scripts
 #TODO: validate that the fetching logic is sound and what we need
 #TODO: add proper logging
+#TODO: add graceful shutdown
 
 #TESTS:
 # - picks up task scheduled for now - PASS
@@ -61,18 +62,6 @@ def main():
     api_key = model_attribs['apikey']
     api_url = "https://kyllobrooks.com/api/mhs"
 
-    # fetch and construct praw object
-    reddit = praw.Reddit(
-        client_id=keys['client_id'],
-        client_secret=keys['client_secret'],
-        password=keys['password'],
-        user_agent="web:mhs-crawler-bot:v1 (by /u/mhs-crawler-bot)",
-        username="mhs-crawler-bot",
-    )
-
-    # set readonly mode
-    reddit.read_only = False
-
     # status message, replace with logging
     print("Starting Task Manager...")
 
@@ -98,7 +87,7 @@ def main():
         if task == None:
             # debug message, dont log this
             print('Task Manager is Idle...')
-            time.sleep(30)
+            time.sleep(10)
             continue
         # log this
         task.status = 1
