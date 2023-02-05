@@ -5,3 +5,4 @@ db.sqlite3
 cloud_sql_proxy*
 htmlcov
 .coverage
+connect.sh
