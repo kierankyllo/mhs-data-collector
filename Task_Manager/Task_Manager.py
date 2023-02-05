@@ -44,7 +44,7 @@ class Task_Manager():
                                    )
             # only append gather objects containing samples
             # could also be used to drop gather objects with samples less than comments_n if we want
-            if len(sample.samples()) != 0:
+            if len(sample.samples()) == self.__task.comments_n:
                 self.__Gather_list.append(sample)
                 self.__subreddit_list.append(sample.name)
 

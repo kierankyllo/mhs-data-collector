@@ -19,9 +19,9 @@ import time
 # - assigns proper status to tasks for each execution for each case
 
                     # ('0', 'Scheduled'), - PASS
-                    # ('1', 'In Progress'), - 
+                    # ('1', 'In Progress'), - PASS
                     # ('2', 'Completed'), - PASS
-                    # ('3', 'Error'), - 
+                    # ('3', 'Error'), - PASS
                     # ('4', 'Cancelled') - 
 def main():
     '''
