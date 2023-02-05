@@ -7,6 +7,8 @@ import pytz
 
 # copying how manage.py does it
 
+#  at present this script is a hacky way to do tests
+#  we need to make these more formalized and structured into the tests.py file
 
 def main():
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mysite.settings')
@@ -39,6 +41,8 @@ def main():
 
     # when is now in regina
     now = datetime.datetime.now(pytz.timezone('America/Regina'))
+    future = now + datetime.timedelta(minutes=5)
+    past = now - datetime.timedelta(minutes=5)
 
     # #fetch a list of subreddits
     # SUBS_N = 1
@@ -53,7 +57,6 @@ def main():
     # # build a random nonrepeating sample of the list
     # sublist = random.sample(biglist, SUBS_N)
 
-    # sublist = ['rpcs3', 'BingQuizAnswers', 'subnautica']
     sublist = ['programming', 'rpcs3', 'subnautica']
 
     # create a dummy inference task for testing and push to db
@@ -69,11 +72,32 @@ def main():
                               )
     task_out.save()
 
-    # fetch the dummy task record from db using a simplistic method 'latest'
-    task_in = Inference_task.objects.latest('start_sched')
+        # create a dummy inference task for testing and push to db
+    task_out = Inference_task(start_sched=past,
+                              time_scale='week',
+                              min_words=1,
+                              forest_width=1,
+                              per_post_n=1000,
+                              comments_n=100,
+                              subreddit_set=sublist,
+                              status='0',
 
-    # pass the task to the Task manager class object to construct the Gather list
-    gathers = Task_Manager(task_in, api_url, api_key, reddit)
+                              )
+    task_out.save()
+
+        # create a dummy inference task for testing and push to db
+    task_out = Inference_task(start_sched=future,
+                              time_scale='week',
+                              min_words=1,
+                              forest_width=1,
+                              per_post_n=1000,
+                              comments_n=100,
+                              subreddit_set=sublist,
+                              status='0',
+
+                              )
+    task_out.save()
+
 
 
 if __name__ == '__main__':
