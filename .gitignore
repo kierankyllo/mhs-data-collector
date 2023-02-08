@@ -6,3 +6,5 @@ cloud_sql_proxy*
 htmlcov
 .coverage
 connect.sh
+t_settings.py
+t_manage.py

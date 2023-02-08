@@ -12,6 +12,18 @@ from gather.models import Subreddit, Subreddit_result, Subreddit_mod, Comment_re
 
 class Task_Manager():
     '''
+    The `Task_Manager` class is responsible for processing a `task_object` and aggregating information
+    related to the task such as Subreddits, Reddit authors, and Reddit moderators.
+    The class uses the `Get_Subreddit` class to obtain information from the Reddit API.
+    The information collected is stored on the database.
+
+    Parameters:
+
+    - `task_object`: An object representing a task.
+    - `api_url`: The URL for the Reddit API.
+    - `api_key`: An API key for accessing the Reddit API.
+    - `praw_object`: An object for accessing the Reddit API using the `praw` library.
+    - `chunk_size` (optional, default=100): The size of the chunks used to process information from the Reddit API.
     '''
 
     def __init__(self, task_object, api_url, api_key, praw_object, chunk_size=100):
@@ -33,6 +45,9 @@ class Task_Manager():
 
     # defines a function to build a list of Gather objects
     def __build_Gather_lists(self):
+        '''
+        Builds a list of `Get_Subreddit` objects.
+        '''
         for sub in self.__subreddit_set:
             sample = Get_Subreddit(sub, self.__url, self.__apikey, self.__praw,    scope=self.__task.time_scale,
                                    min_words=self.__task.min_words,
@@ -50,6 +65,7 @@ class Task_Manager():
 
     # this sucked to write i need a whiteboard to explain it
     def __discover_JSON_edges(self, context):
+        '''Discovers edges between Subreddits based on Reddit authors or moderators.'''
         t = tqdm(total=self.__dims, desc='Edge Discovery : ' + context)
         outer = []
         for i in range(self.__dims):
@@ -79,7 +95,7 @@ class Task_Manager():
         return outer
 
     def __wrap_JSON_edges(self):
-
+        '''Wraps the edges discovered in the `__discover_JSON_edges()` method.'''
         mods_edges = self.__discover_JSON_edges('mods')
         authors_edges = self.__discover_JSON_edges('authors')
         wrapper = []
@@ -89,6 +105,7 @@ class Task_Manager():
         return wrapper
 
     def __push_Subreddit(self, sub_object):
+        '''Saves the Subreddit information as a `Subreddit` model.'''
         custom_id = sub_object.info()['pk']
         display_name = sub_object.info()['display_name']
         r = Subreddit(custom_id=custom_id, display_name=display_name)
@@ -96,6 +113,7 @@ class Task_Manager():
         return r
 
     def __push_Subreddit_result(self, sub_object, edges_json, subreddit, inference_task):
+        '''Saves the results for a Subreddit as a `Subreddit_result` model.'''
         min = sub_object.stats()['min']
         max = sub_object.stats()['max']
         mean = sub_object.stats()['mean']
@@ -114,12 +132,14 @@ class Task_Manager():
         return r
 
     def __push_Subreddit_mod(self, sub_object, subreddit, result):
+        '''Saves the moderators for a Subreddit as `Subreddit_mod` models.'''
         for mod in sub_object.mod_set():
             r = Subreddit_mod(subreddit=subreddit,
                               username=mod, subreddit_result=result)
             r.save()
 
     def __push_Comment_result(self, sub_object, subreddit, result):
+        '''Saves the comments for a Subreddit as `Comment_result` models.'''
         for comment in sub_object.data():
             subreddit_result = result
             subreddit = subreddit
@@ -142,6 +162,7 @@ class Task_Manager():
         self.__push_Comment_result(sub_object, s, r)
 
     def __push_All(self):
+        '''Calls all the above methods to save the information for each Subreddit.'''
         t = tqdm(total=len(self.__Gather_list), desc='Database Push : ')
         assert (len(self.__Gather_list) == len(
             self.__edges_list)), 'list size mismatch'
