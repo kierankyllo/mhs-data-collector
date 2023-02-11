@@ -1,7 +1,5 @@
 from tqdm import tqdm
-import json
 import requests
-from dataclasses import dataclass
 from . import commentData
 
 
