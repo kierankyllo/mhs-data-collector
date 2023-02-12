@@ -1,11 +1,14 @@
 import json
-
-from tqdm import tqdm
+import datetime
+import numpy as np
+from tqdm import tqdm, trange
 
 from gather.models import (Comment_result, Inference_task, Subreddit,
                            Subreddit_mod, Subreddit_result)
 
-from . import Subreddit_Data_Collector
+from . import Subreddit_Data_Collector, commentData
+from .inferencer import Inferencer
+
 
 # TODO: build test scripts for the class
 # TODO: debug using 'issues' workflow
@@ -40,75 +43,78 @@ class Task_Manager():
         return cls._instance
 
     def do_Task(self, task_object: Inference_task, api_url, api_key, praw_object, chunk_size=100) -> None:
+        sdc = Subreddit_Data_Collector(praw_object)
 
-        Gather_list = self.__build_Gather_lists(
-            task_object, api_url, api_key, praw_object, chunk_size)
-        edges_lists = self.__wrap_edges(Gather_list)
-        self.__push_All(Gather_list, edges_lists, task_object)
+        # get the comment data for all of the subs
+        all_Comment_Data = {sub:  sdc.get_Comment_Data(
+            display_name=sub,
+            scope=task_object.time_scale,
+            min_words=task_object.min_words,
+            forest_width=task_object.forest_width,
+            per_post_n=task_object.per_post_n,
+            comments_n=task_object.comments_n)
 
-    def __build_Gather_lists(self, task_object: Inference_task, api_url, api_key, praw_object, chunk_size):
-        '''
-        Builds a list of `Get_Subreddit` objects.
-        '''
-        Gather_list = [Subreddit_Data_Collector(sub,
-                                                api_url,
-                                                api_key,
-                                                praw_object,
-                                                scope=task_object.time_scale,
-                                                min_words=task_object.min_words,
-                                                inference=True,
-                                                forest_width=task_object.forest_width,
-                                                per_post_n=task_object.per_post_n,
-                                                comments_n=task_object.comments_n,
-                                                chunk_size=chunk_size
-                                                )
-                       for sub in task_object.subreddit_set]
-        # remove any subreddits that don't have the rquested number of comments
-        filter(lambda s: len(s.samples()) == task_object.comments_n)
-        return Gather_list
+            for sub in task_object.subreddit_set}
 
-    def __wrap_edges(self, Gather_list: Subreddit_Data_Collector):
+        # Do inference for those subs
+        inf = Inferencer(api_key, api_url)
+        for sub in all_Comment_Data:
+            all_Comment_Data[sub] = inf.infer(
+                all_Comment_Data[sub], chunk_size)
+
+        all_Mods = {
+            sub: sdc.get_mod_set(sub)
+            for sub in task_object.subreddit_set
+        }
+
+        all_Authors = {
+            sub: sdc.get_author_set_from_comment_data(all_Comment_Data[sub])
+
+            for sub in all_Comment_Data
+        }
+
+        edges_list = self.__wrap_edges(all_Mods, all_Authors)
+        # push any new subreddits to the database, and get references to them
+        db_Subreddit = self.__push_Subreddits(
+            sdc, list(all_Comment_Data.keys()))
+
+        db_Subbredit_results = self.__push_Subreddit_result(allComments=all_Comment_Data,
+                                                            edges=edges_list,
+                                                            subreddits=db_Subreddit,
+                                                            inference_task=task_object
+                                                            )
+
+        self.__push_Subreddit_mod(
+            mod_list=all_Mods, subreddit=db_Subreddit, result=db_Subbredit_results)
+        self.__push_Comment_result(
+            comments=all_Comment_Data, subreddit=db_Subreddit, result=db_Subbredit_results)
+
+    def __wrap_edges(self, mods: dict[str, set[str]], authors: dict[str, set[str]]):
         '''Wraps the edges discovered in the `__discover_edge()` method.'''
-        mods_edges = self.__discover_edge('mods', Gather_list)
-        authors_edges = self.__discover_edge('authors', Gather_list)
-        wrapper = []
-        for (m, a) in zip(mods_edges, authors_edges):
-            data = {"mods": m, "authors": a}
-            wrapper.append(data)
+        mods_edges = self.__discover_edge(mods, "Mods")
+        authors_edges = self.__discover_edge(authors, "Authors")
+        wrapper = {}
+        for sub in mods_edges.keys():
+            data = {"mods": mods_edges[sub], "authors": authors_edges[sub]}
+            wrapper.update({sub: data})
         return wrapper
 
-    def __discover_edge(self, context, Gather_list: Subreddit_Data_Collector):
+    def __discover_edge(self, collection: dict[str, set[str]], context) -> dict[str, dict[str, int]]:
         '''Discovers edges between Subreddits based on Reddit authors or moderators.'''
-        num_subreddits = len(Gather_list)
-        t = tqdm(total=num_subreddits, desc='Edge Discovery : ' + context)
-        outer = []
-        for i in range(num_subreddits):
+        keys = list(collection.keys())
+        num_subreddits = len(keys)
+        outer = {}
+        for i in trange(num_subreddits, desc=f"Edge Discovery: {context}"):
             inner = {}
-            t.update(1)
             for j in range(i+1, num_subreddits):
-                A, B
-                if context == 'mods':
-                    A = Gather_list[i].mod_set()
-                    B = Gather_list[j].mod_set()
-
-                if context == 'authors':
-                    A = Gather_list[i].author_set()
-                    B = Gather_list[j].author_set()
-
+                A = collection[keys[i]]
+                B = collection[keys[j]]
                 edge = len(A.intersection(B))
                 if edge > 0:
-                    data = {Gather_list[j].name(): edge}
+                    data = {keys[j]: edge}
                     inner.update(data)
-            outer.append(inner)
+            outer.update({keys[i]: inner})
         return outer
-
-    def __push_All(self, Gather_list: Subreddit_Data_Collector, edges_list, task: Inference_task):
-        '''Calls methods to save the information for each Subreddit.'''
-        t = tqdm(total=len(Gather_list), desc='Database Push : ')
-        assert (len(Gather_list) == len(edges_list)), 'list size mismatch'
-        for (gather, edge) in zip(Gather_list, edges_list):
-            self.__push_SubredditData(gather, edge, task)
-            t.update(1)
 
     def __push_SubredditData(self, sub_object: Subreddit_Data_Collector, edges, task):
         s = self.__push_Subreddit(sub_object)
@@ -116,42 +122,74 @@ class Task_Manager():
         self.__push_Subreddit_mod(sub_object, s, r)
         self.__push_Comment_result(sub_object, s, r)
 
-    def __push_Subreddit(self, sub_object: Subreddit_Data_Collector):
-        custom_id = sub_object.info()["custom_id"]
-        display_name = sub_object.info()["display_name"]
-        sub, created = Subreddit.objects.get_or_create(
-            custom_id=custom_id, display_name=display_name)
-        return sub
+    def __push_Subreddits(self, sdc: Subreddit_Data_Collector, subs: list[str]) -> None:
+        subreddits = [
+            Subreddit.objects.get_or_create(
+                custom_id=sdc.get_custom_id(sub), display_name=sub)
+            for sub in tqdm(subs, desc="Pushing Subreddits")
+        ]
 
-    def __push_Subreddit_result(self, sub_object: Subreddit_Data_Collector, edges, subreddit, inference_task):
+        return {sub[0].display_name: sub[0] for sub in subreddits}
+
+    def __push_Subreddit_result(self,
+                                allComments: dict[str, list[commentData]],
+                                edges,
+                                subreddits: dict[str, Subreddit],
+                                inference_task: Inference_task):
         '''Saves the results for a Subreddit as a `Subreddit_result` model.'''
-        min = sub_object.stats()['min']
-        max = sub_object.stats()['max']
-        mean = sub_object.stats()['mean']
-        std = sub_object.stats()['std']
-        timestamp = sub_object.stats()['timestamp']
-        return Subreddit_result.objects.create(subreddit=subreddit,
-                                               inference_task=inference_task,
-                                               min_result=min,
-                                               max_result=max,
-                                               mean_result=mean,
-                                               std_result=std,
-                                               timestamp=timestamp,
-                                               edges=json.dumps(edges))
+        result = {}
+        for sub in tqdm(allComments.keys(), desc="Pushing Subreddit Results"):
+            # isolate the mhs results
+            arr = [c.mhs_score for c in allComments[sub] if c.mhs_score != None]
 
-    def __push_Subreddit_mod(self, sub_object: Subreddit_Data_Collector, subreddit, result):
+            if len(arr) < 0:
+                arr = np.array(arr)
+                result.update({
+                    sub:
+                    Subreddit_result.objects.create(subreddit=subreddits[sub],
+                                                    inference_task=inference_task,
+                                                    min_result=arr.min(),
+                                                    max_result=arr.max(),
+                                                    mean_result=arr.mean(),
+                                                    std_result=arr.std(),
+                                                    timestamp=datetime.datetime.now(),
+                                                    edges=json.dumps(edges[sub]))
+                })
+
+            else:
+                result.update({
+                    sub:
+                    Subreddit_result.objects.create(subreddit=subreddits[sub],
+                                                    inference_task=inference_task,
+                                                    min_result=0.0,
+                                                    max_result=0.0,
+                                                    mean_result=0.0,
+                                                    std_result=0.0,
+                                                    timestamp=datetime.datetime.now(),
+                                                    edges=json.dumps(edges[sub]))
+                })
+
+        return result
+
+    def __push_Subreddit_mod(self, mod_list: dict[str, set[str]], subreddit: Subreddit, result: Subreddit_result):
         '''Saves the moderators for a Subreddit as `Subreddit_mod` models.'''
-        mods = [Subreddit_mod(subreddit=subreddit, username=mod, subreddit_result=result)
-                for mod in sub_object.mod_set()]
-        Subreddit_mod.objects.bulk_create(mods)
 
-    def __push_Comment_result(self, sub_object: Subreddit_Data_Collector, subreddit, result):
+        for sub in tqdm(mod_list.keys(), desc="Pushing Mods"):
+
+            mods = [Subreddit_mod(subreddit=subreddit[sub], username=mod, subreddit_result=result[sub])
+                    for mod in mod_list[sub]]
+            Subreddit_mod.objects.bulk_create(mods)
+
+    def __push_Comment_result(self, comments: dict[str, list[commentData]], subreddit: Subreddit, result: Subreddit_result):
         '''Saves the comments for a Subreddit as `Comment_result` models.'''
-        comments = [Comment_result(subreddit_result=result,
-                                   subreddit=subreddit,
-                                   permalink=x['permalink'],
-                                   mhs_score=x['mhs_score'],
-                                   comment_body=x['comment_body'],
-                                   username=x['username'])
-                    for x in sub_object.data()]
-        Comment_result.objects.bulk_create(comments)
+
+        for sub in tqdm(comments.keys(), desc="Pushing Comments"):
+            db_comments = [Comment_result(subreddit_result=result[sub],
+                                          subreddit=subreddit[sub],
+                                          permalink=comment.permalink,
+                                          mhs_score=(
+                                              comment.mhs_score if comment.mhs_score != None else 0.0),
+                                          comment_body=comment.comment_body,
+                                          username=comment.username)
+                           for comment in comments[sub]]
+            Comment_result.objects.bulk_create(db_comments)

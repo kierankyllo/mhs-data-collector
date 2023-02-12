@@ -1,9 +1,10 @@
+import datetime
+import json
+import re
+from dataclasses import dataclass
 import numpy as np
 import requests
 from tqdm import tqdm
-import re
-import json
-import datetime
 
 # sys.path.append('/home/kyllo/projects/gather_bot/gather')
 # os.environ['DJANGO_SETTINGS_MODULE'] = 'mysite.settings'
@@ -14,8 +15,19 @@ import datetime
 # TODO: debug using 'issues' workflow
 # TODO: add error handling code
 # TODO: docstrings and code formatting compliance
+# TODO: Seperate Inferencing into its own class
+# TODO: Make the data collector return a data object
 
-class Get_Subreddit:
+@dataclass
+class commentData:
+    comment_body: str
+    username: str
+    permalink: str
+    mhs_score: float
+    edited: bool
+
+
+class Subreddit_Data_Collector:
     """
     Class object representing a subreddit
     Keyword arguments:
@@ -56,7 +68,7 @@ class Get_Subreddit:
         self.__results = []
         # info dictionary maps to 'Subreddit' ORM
         self.__info = {
-            'pk': self.__sub.id,
+            'custom_id': self.__sub.id,
             'display_name': display_name,
         }
         # task dictionary maps to 'Inference_Task' ORM
@@ -96,13 +108,10 @@ class Get_Subreddit:
                     break
                 if comment.author is not None and self.__count_words(comment.body) > self.__min_words:
                     t.update(1)
-                    data = {
-                        'comment_body': self.__sanitize(comment.body),
-                        'username': comment.author.name,
-                        'permalink': comment.permalink,
-                        'mhs_score': float(),
-                        'edited': comment.edited
-                    }
+                    data = commentData(comment_body=self.__sanitize(comment.body),
+                                       username=comment.author.name,
+                                       permalink=comment.permalink,
+                                       edited=comment.edited)
                     self.__data.append(data)
                     if len(self.__data) == self.__comments_n:
                         break

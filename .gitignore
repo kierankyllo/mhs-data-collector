@@ -8,3 +8,4 @@ htmlcov
 connect.sh
 t_settings.py
 t_manage.py
+t_script.py
