@@ -65,6 +65,8 @@ def main():
     # status message, replace with logging
     print("Starting Task Manager...")
 
+    task_manager = Task_Manager()
+
     while True:
 
         # fetch and construct praw object
@@ -93,7 +95,7 @@ def main():
         task.status = 1
         task.save()
         try:
-            job = Task_Manager(task, api_url, api_key, praw_obj)
+            task_manager.do_Task(task, api_url, api_key, praw_obj)
         except:
             # log this
             task.status = 3
@@ -104,6 +106,5 @@ def main():
         task.status = 2
         task.save()
 
-  
 if __name__ == '__main__':
     main()

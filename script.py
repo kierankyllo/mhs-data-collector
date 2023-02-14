@@ -64,11 +64,10 @@ def main():
                               time_scale='week',
                               min_words=1,
                               forest_width=1,
-                              per_post_n=1000,
+                              per_post_n=100,
                               comments_n=100,
                               subreddit_set=sublist,
                               status='0',
-
                               )
     task_out.save()
 
