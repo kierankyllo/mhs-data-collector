@@ -116,11 +116,6 @@ class Task_Manager():
             outer.update({keys[i]: inner})
         return outer
 
-    def __push_SubredditData(self, sub_object: Subreddit_Data_Collector, edges, task):
-        s = self.__push_Subreddit(sub_object)
-        r = self.__push_Subreddit_result(sub_object, edges, s, task)
-        self.__push_Subreddit_mod(sub_object, s, r)
-        self.__push_Comment_result(sub_object, s, r)
 
     def __push_Subreddits(self, sdc: Subreddit_Data_Collector, subs: list[str]) -> None:
         subreddits = [
