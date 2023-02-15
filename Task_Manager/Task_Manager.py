@@ -4,7 +4,7 @@ import numpy as np
 from tqdm import tqdm, trange
 
 from gather.models import (Comment_result, Inference_task, Subreddit,
-                           Subreddit_mod, Subreddit_result)
+                           Subreddit_mod, Subreddit_result, Mod_edge, Author_edge)
 
 from . import Subreddit_Data_Collector, commentData
 from .inferencer import Inferencer
@@ -57,10 +57,10 @@ class Task_Manager():
             for sub in task_object.subreddit_set}
 
         # Do inference for those subs
-        inf = Inferencer(api_key, api_url)
-        for sub in all_Comment_Data:
-            all_Comment_Data[sub] = inf.infer(
-                all_Comment_Data[sub], chunk_size)
+        # inf = Inferencer(api_key, api_url)
+        # for sub in all_Comment_Data:
+        #     all_Comment_Data[sub] = inf.infer(
+        #         all_Comment_Data[sub], chunk_size)
 
         all_Mods = {
             sub: sdc.get_mod_set(sub)
@@ -73,49 +73,71 @@ class Task_Manager():
             for sub in all_Comment_Data
         }
 
-        edges_list = self.__wrap_edges(all_Mods, all_Authors)
         # push any new subreddits to the database, and get references to them
         db_Subreddit = self.__push_Subreddits(
             sdc, list(all_Comment_Data.keys()))
 
         db_Subbredit_results = self.__push_Subreddit_result(allComments=all_Comment_Data,
-                                                            edges=edges_list,
                                                             subreddits=db_Subreddit,
                                                             inference_task=task_object
                                                             )
+
+        self.__push_Edges(task_object, db_Subbredit_results,
+                          all_Mods, all_Authors)
 
         self.__push_Subreddit_mod(
             mod_list=all_Mods, subreddit=db_Subreddit, result=db_Subbredit_results)
         self.__push_Comment_result(
             comments=all_Comment_Data, subreddit=db_Subreddit, result=db_Subbredit_results)
 
-    def __wrap_edges(self, mods: dict[str, set[str]], authors: dict[str, set[str]]):
+    def __push_Edges(self,
+                     task: Inference_task,
+                     subs: dict[str, Subreddit_result],
+                     mods: dict[str, set[str]],
+                     authors: dict[str, set[str]]):
         '''Wraps the edges discovered in the `__discover_edge()` method.'''
-        mods_edges = self.__discover_edge(mods, "Mods")
-        authors_edges = self.__discover_edge(authors, "Authors")
-        wrapper = {}
-        for sub in mods_edges.keys():
-            data = {"mods": mods_edges[sub], "authors": authors_edges[sub]}
-            wrapper.update({sub: data})
-        return wrapper
 
-    def __discover_edge(self, collection: dict[str, set[str]], context) -> dict[str, dict[str, int]]:
+        # Mods
+        keys = list(mods.keys())
+        num_subreddits = len(keys)
+        mod_edges = []
+        for i in trange(num_subreddits, desc=f"Mod Edge Discovery:"):
+            for j in range(i+1, num_subreddits):
+                A = mods[keys[i]]
+                B = mods[keys[j]]
+                weight = len(A.intersection(B))
+                if weight > 0:
+                    mod_edges.append(
+                        Mod_edge(from_sub=subs[A], to_Sub=subs[B], inference_task=task, weight=weight))
+
+        Mod_edge.objects.bulk_create(mod_edges)
+        # Authors
+        keys = list(authors.keys())
+        num_subreddits = len(keys)
+        author_edges = []
+        for i in trange(num_subreddits, desc=f"Mod Edge Discovery:"):
+            for j in range(i+1, num_subreddits):
+                A = authors[keys[i]]
+                B = authors[keys[j]]
+                weight = len(A.intersection(B))
+                if weight > 0:
+                    author_edges.append(
+                        Mod_edge(from_sub=subs[A], to_Sub=subs[B], inference_task=task, weight=weight))
+
+        Author_edge.objects.bulk_create(author_edges)
+
+    def __create_edge(self, collection: dict[str, set[str]], context, subs: dict[str, Subreddit_result]) -> dict[str, dict[str, int]]:
         '''Discovers edges between Subreddits based on Reddit authors or moderators.'''
         keys = list(collection.keys())
         num_subreddits = len(keys)
-        outer = {}
+        mod_edges = []
         for i in trange(num_subreddits, desc=f"Edge Discovery: {context}"):
-            inner = {}
             for j in range(i+1, num_subreddits):
                 A = collection[keys[i]]
                 B = collection[keys[j]]
                 edge = len(A.intersection(B))
                 if edge > 0:
-                    data = {keys[j]: edge}
-                    inner.update(data)
-            outer.update({keys[i]: inner})
-        return outer
-
+                    mod_edges.append(Mod_edge())
 
     def __push_Subreddits(self, sdc: Subreddit_Data_Collector, subs: list[str]) -> None:
         subreddits = [
@@ -128,11 +150,12 @@ class Task_Manager():
 
     def __push_Subreddit_result(self,
                                 allComments: dict[str, list[commentData]],
-                                edges,
                                 subreddits: dict[str, Subreddit],
-                                inference_task: Inference_task):
+                                inference_task: Inference_task
+                                ) -> dict[str, Subreddit_result]:
         '''Saves the results for a Subreddit as a `Subreddit_result` model.'''
         result = {}
+        emptyList = []
         for sub in tqdm(allComments.keys(), desc="Pushing Subreddit Results"):
             # isolate the mhs results
             arr = [c.mhs_score for c in allComments[sub] if c.mhs_score != None]
@@ -148,7 +171,7 @@ class Task_Manager():
                                                     mean_result=arr.mean(),
                                                     std_result=arr.std(),
                                                     timestamp=datetime.datetime.now(),
-                                                    edges=json.dumps(edges[sub]))
+                                                    edges=json.dumps(emptyList))
                 })
 
             else:
@@ -161,7 +184,7 @@ class Task_Manager():
                                                     mean_result=0.0,
                                                     std_result=0.0,
                                                     timestamp=datetime.datetime.now(),
-                                                    edges=json.dumps(edges[sub]))
+                                                    edges=json.dumps(emptyList))
                 })
 
         return result
