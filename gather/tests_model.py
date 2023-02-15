@@ -5,7 +5,7 @@ from django.db.utils import IntegrityError
 from django.db.transaction import TransactionManagementError
 
 # MODEL TESTS
-# TODO: Comment_result
+# TODO: add tests for Mod_edge, Author_edge
 
 
 class Subreddit_Test(TestCase):

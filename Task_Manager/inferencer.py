@@ -47,7 +47,7 @@ class Inferencer():
         """
         response = []
 
-        t = tqdm(total=len(comments), desc=f"Inference")
+        t = tqdm(total=len(comments), desc=f"Inference:")
         comment_text = [x.comment_body for x in comments]
         for chunk in self.__chunker(comment_text, chunk_size):
             for attempts in range(5):

@@ -4,6 +4,7 @@ import praw
 import django
 import datetime
 import pytz
+import random
 
 # copying how manage.py does it
 
@@ -44,20 +45,20 @@ def main():
     # future = now + datetime.timedelta(minutes=5)
     # past = now - datetime.timedelta(minutes=5)
 
-    # # #fetch a list of subreddits
-    # # SUBS_N = 1
+    #fetch a list of subreddits
+    SUBS_N = 200
 
-    # # # make an empty list
-    # # biglist = []
+    # make an empty list
+    biglist = []
 
-    # # # fetch all the subreddits you can
-    # # for subreddit in reddit.subreddits.popular(limit=None):
-    # #     biglist.append(subreddit.display_name)
+    # fetch all the subreddits you can
+    for subreddit in reddit.subreddits.popular(limit=None):
+        biglist.append(subreddit.display_name)
 
-    # # # build a random nonrepeating sample of the list
-    # # sublist = random.sample(biglist, SUBS_N)
+    # build a random nonrepeating sample of the list
+    sublist = random.sample(biglist, SUBS_N)
 
-    sublist = ['programming', 'rpcs3', 'subnautica']
+    # sublist = ['programming', 'rpcs3', 'subnautica']
 
     # create a dummy inference task for testing and push to db
     task_out = Inference_task(start_sched=now,

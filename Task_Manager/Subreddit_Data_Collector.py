@@ -43,40 +43,7 @@ class Subreddit_Data_Collector:
     def get_custom_id(self, display_name) -> str:
         return self.__praw.subreddit(display_name).id
 
-# below here is unimplemented
-
-    # def data(self):
-    #     '''Returns the main subreddit data list of dicts'''
-    #     return self.__data
-
-    # def info(self):
-    #     '''Returns the subreddit metadata dict'''
-    #     return self.__info
-
-    # def task(self):
-    #     '''Returns the inference task dict'''
-    #     return self.__task
-
-    # def name(self):
-    #     """Returns the display name of the subreddit"""
-    #     return self.__name
-
-    # def samples(self):
-    #     """Returns the list of text samples gathered"""
-    #     return self.__sample_list
-
-    # def results(self):
-    #     """Returns a list of inference results"""
-    #     return self.__results
-
-    # def stats(self):
-    #     """Returns a dict of descriptive stats: [min, max, mean, std, timestamp]"""
-    #     return self.__stats
-
-    # constructor function to build moderator list
-
     # constructor function to build comments list
-
     def __fetch_content(self, name, posts, comments_n, min_words, forest_width, per_post_n):
         t = tqdm(total=comments_n, desc=f"Collection: {name}")
         result = []
