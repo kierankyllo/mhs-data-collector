@@ -57,10 +57,10 @@ class Task_Manager():
             for sub in task_object.subreddit_set}
 
         # Do inference for those subs
-        # inf = Inferencer(api_key, api_url)
-        # for sub in all_Comment_Data:
-        #     all_Comment_Data[sub] = inf.infer(
-        #         all_Comment_Data[sub], chunk_size)
+        inf = Inferencer(api_key, api_url)
+        for sub in all_Comment_Data:
+            all_Comment_Data[sub] = inf.infer(
+                all_Comment_Data[sub], chunk_size)
 
         all_Mods = {
             sub: sdc.get_mod_set(sub)
