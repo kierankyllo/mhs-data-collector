@@ -57,10 +57,10 @@ class Task_Manager():
             for sub in task_object.subreddit_set}
 
         # Do inference for those subs
-        # inf = Inferencer(api_key, api_url)
-        # for sub in all_Comment_Data:
-        #     all_Comment_Data[sub] = inf.infer(
-        #         all_Comment_Data[sub], chunk_size)
+        inf = Inferencer(api_key, api_url)
+        for sub in all_Comment_Data:
+            all_Comment_Data[sub] = inf.infer(
+                all_Comment_Data[sub], chunk_size)
 
         all_Mods = {
             sub: sdc.get_mod_set(sub)
@@ -98,7 +98,7 @@ class Task_Manager():
         '''Wraps the edges discovered in the `__discover_edge()` method.'''
 
         # Mods
-        keys = list(mods.keys())
+        keys = list(subs.keys())
         num_subreddits = len(keys)
         mod_edges = []
         for i in trange(num_subreddits, desc=f"Mod Edge Discovery:"):
@@ -108,21 +108,21 @@ class Task_Manager():
                 weight = len(A.intersection(B))
                 if weight > 0:
                     mod_edges.append(
-                        Mod_edge(from_sub=subs[A], to_Sub=subs[B], inference_task=task, weight=weight))
+                        Mod_edge(from_sub=subs[keys[i]], to_sub=subs[keys[j]], inference_task=task, weight=weight))
 
         Mod_edge.objects.bulk_create(mod_edges)
         # Authors
         keys = list(authors.keys())
         num_subreddits = len(keys)
         author_edges = []
-        for i in trange(num_subreddits, desc=f"Mod Edge Discovery:"):
+        for i in trange(num_subreddits, desc=f"Author Edge Discovery:"):
             for j in range(i+1, num_subreddits):
                 A = authors[keys[i]]
                 B = authors[keys[j]]
                 weight = len(A.intersection(B))
                 if weight > 0:
                     author_edges.append(
-                        Mod_edge(from_sub=subs[A], to_Sub=subs[B], inference_task=task, weight=weight))
+                        Mod_edge(from_sub=subs[keys[i]], to_sub=subs[keys[j]], inference_task=task, weight=weight))
 
         Author_edge.objects.bulk_create(author_edges)
 
