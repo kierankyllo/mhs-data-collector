@@ -1,4 +1,3 @@
-keys.json
 *.ipynb
 __pycache__/
 db.sqlite3
@@ -7,3 +6,4 @@ htmlcov
 .coverage
 connect.sh
 t_*
+docker-compose.yml
