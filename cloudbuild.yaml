@@ -1,10 +1,10 @@
 steps:
 # Build the container image
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['build', '-t', 'gcr.io/110419161031/gather-bot-image', '.']
+  args: ['build', '-t', 'gcr.io/mhs-reddit/gather-bot-image', '.']
 # Push the container image to Container Registry
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['push', 'gcr.io/110419161031/gather-bot-image']
+  args: ['push', 'gcr.io/mhs-reddit/gather-bot-image']
 
 images:
-- gcr.io/110419161031/gather-bot-image
+- gcr.io/mhs-reddit/gather-bot-image
