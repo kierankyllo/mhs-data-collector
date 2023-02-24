@@ -26,9 +26,19 @@ steps:
   entrypoint: bash
   args:
     - "-c"
-    - "(./cloud-sql-proxy mhs-reddit:northamerica-northeast2:mhs-db & sleep 2) && docker run --network=host gcr.io/mhs-reddit/gather-bot-image python3 manage.py test"
+    - "(./cloud-sql-proxy mhs-reddit:northamerica-northeast2:mhs-db & sleep 2) && python3 manage.py test"
   timeout: "30s"
   waitFor: ['build', 'push', 'proxy-install']
+
+
+# - id: testing
+#   name: 'gcr.io/cloud-builders/docker'
+#   entrypoint: bash
+#   args:
+#     - "-c"
+#     - "(./cloud-sql-proxy mhs-reddit:northamerica-northeast2:mhs-db & sleep 2) && docker run --network=host gcr.io/mhs-reddit/gather-bot-image python3 manage.py test"
+#   timeout: "30s"
+#   waitFor: ['build', 'push', 'proxy-install']
 
 images:
 - gcr.io/mhs-reddit/gather-bot-image
