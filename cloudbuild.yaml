@@ -20,8 +20,8 @@ steps:
   entrypoint: 'bash'
   args: - -c
         - |
-        /workspace/cloud-sql-proxy -instances=mhs-reddit:northamerica-northeast2:mhs-db=tcp:172.26.0.3:5432 & sleep 2 
-        docker run gcr.io/mhs-reddit/gather-bot-image python3 manage.py test
+        - /workspace/cloud-sql-proxy -instances=mhs-reddit:northamerica-northeast2:mhs-db=tcp:172.26.0.3:5432 & sleep 2 
+        - docker run gcr.io/mhs-reddit/gather-bot-image python3 manage.py test
   waitFor: [build, push, proxy-install]
 
 images:
