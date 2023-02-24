@@ -8,21 +8,41 @@ steps:
   name: 'gcr.io/cloud-builders/docker'
   args: ['push', 'gcr.io/mhs-reddit/gather-bot-image']
 
-- id: proxy-install
-  name: 'gcr.io/cloud-builders/docker'
-  entrypoint: bash
-  args:
-    - -c
-    - curl -o /workspace/cloud-sql-proxy https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v2.0.0/cloud-sql-proxy.linux.amd64 && chmod +x /workspace/cloud-sql-proxy
+# - id: proxy-install
+#   name: 'gcr.io/cloud-builders/docker'
+#   entrypoint: bash
+#   args:
+#     - -c
+#     - curl -o /workspace/cloud-sql-proxy https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v2.0.0/cloud-sql-proxy.linux.amd64 && chmod +x /workspace/cloud-sql-proxy
 
-- id: testing
-  name: 'gcr.io/cloud-builders/docker'
-  entrypoint: bash
+# - id: testing
+#   name: 'gcr.io/cloud-builders/docker'
+#   entrypoint: bash
+#   args:
+#     - "-c"
+#     - "(./cloud-sql-proxy mhs-reddit:northamerica-northeast2:mhs-db & sleep 2) && docker run --network='host' gcr.io/mhs-reddit/gather-bot-image python3 manage.py test"
+#   timeout: "30s"
+#   waitFor: ['build', 'push', 'proxy-install']
+
+- id: "docker-layer"
+  name: "gcr.io/cloud-builders/docker"
+  entrypoint: /bin/bash
   args:
-    - "-c"
-    - "(./cloud-sql-proxy mhs-reddit:northamerica-northeast2:mhs-db & sleep 2) && docker run --network='host' gcr.io/mhs-reddit/gather-bot-image python3 manage.py test"
-  timeout: "30s"
-  waitFor: ['build', 'push', 'proxy-install']
+    - '-c'
+    - |
+      COPY --from=gcr.io/cloud-sql-connectors/cloud-sql-proxy /cloud-sql-proxy /cloudsql/cloud-sql-proxy" > Dockerfile-proxy;
+
+      docker build -f Dockerfile-proxy -t gcr.io/mhs-reddit/gather-bot-image-proxy .
+
+- id: "migrate-tcp"
+  name: "gcr.io/mhs-reddit/gather-bot-image-proxy"
+  dir: sql-proxy
+  entrypoint: /bin/bash
+  args:
+    - '-c'
+    - |
+      /cloudsql/cloud-sql-proxy --port 5432 mhs-reddit:northamerica-northeast2:mhs-db & sleep 2;
+      python3 manage.py test
 
 images:
 - gcr.io/mhs-reddit/gather-bot-image
