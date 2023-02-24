@@ -81,7 +81,7 @@ DATABASES = {
         'NAME': 'mhs-init',
         'USER': 'agent',
         'PASSWORD': 'Tempa$$',
-        'HOST': 'localhost',
+        'HOST': '172.26.0.3',
         'PORT': '5432',
         'TEST': {
             'NAME': 'mhs-test',
