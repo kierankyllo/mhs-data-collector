@@ -10,7 +10,7 @@ steps:
 # Run django unit testing
 - name: 'gcr.io/cloud-builders/docker'
   entrypoint: 'bash'
-  args: ['-c' 'docker run gcr.io/mhs-reddit/gather-bot-image python3 manage.py test']
+  args: ['-c','docker run gcr.io/mhs-reddit/gather-bot-image python3 manage.py test']
 
 images:
 - gcr.io/mhs-reddit/gather-bot-image
