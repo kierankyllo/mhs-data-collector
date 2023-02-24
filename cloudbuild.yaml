@@ -20,7 +20,7 @@ steps:
   entrypoint: bash
   args:
     - "-c"
-    - "(./cloud-sql-proxy mhs-reddit:northamerica-northeast2:mhs-db -a 172.26.0.3 & sleep 2) && echo put the test commands here"
+    - "(./cloud-sql-proxy mhs-reddit:northamerica-northeast2:mhs-db & sleep 2) && python3 manage.py test"
   timeout: "30s"
   waitFor: ['build', 'push', 'proxy-install']
 
