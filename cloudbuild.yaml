@@ -20,7 +20,7 @@ steps:
   entrypoint: bash
   args:
     - "-c"
-    - "(./cloud-sql-proxy -instances=mhs-reddit:northamerica-northeast2:mhs-db & sleep 2) && yarn run knex migrate:latest"
+    - "(./cloud-sql-proxy mhs-reddit:northamerica-northeast2:mhs-db & sleep 2) && echo put the test commands here"
   timeout: "30s"
   waitFor: ['build', 'push', 'proxy-install']
 
