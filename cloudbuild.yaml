@@ -5,6 +5,10 @@ steps:
 # Push the container image to Container Registry
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push', 'gcr.io/mhs-reddit/gather-bot-image']
+# Run django unit testing
+- name: 'gcr.io/cloud-builders/docker'
+  entrypoint: 'python'
+  args: ['-c', 'docker run manage.py test']
 
 images:
 - gcr.io/mhs-reddit/gather-bot-image
