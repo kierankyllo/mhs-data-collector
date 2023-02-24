@@ -11,7 +11,7 @@ steps:
 - id: test
   name: 'gcr.io/cloud-builders/docker'
   entrypoint: bash
-  args: ['docker run --network=host gcr.io/mhs-reddit/gather-bot-image python3 manage.py test']
+  args: ['python3 manage.py test']
 
 
 # - id: proxy-install
