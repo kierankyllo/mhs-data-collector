@@ -11,6 +11,6 @@ steps:
 - name: 'gcr.io/cloud-builders/docker'
   entrypoint: 'bash'
   args: ['-c','docker run gcr.io/mhs-reddit/gather-bot-image python3 manage.py test']
-
+  id: Run Django unit testing
 images:
 - gcr.io/mhs-reddit/gather-bot-image
