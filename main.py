@@ -6,6 +6,10 @@ import datetime
 import pytz
 import time
 import logging
+import google.cloud.logging
+# setup google cloud logging handler
+client = google.cloud.logging.Client()
+client.setup_logging()
 
 # TODO: further abstract away the settings fetching and secrets etc
 # TODO: incorporate into testing scripts
@@ -24,7 +28,6 @@ import logging
 # ('2', 'Completed'), - PASS
 # ('3', 'Error'), - PASS
 # ('4', 'Cancelled') -
-
 
 def main():
     '''
@@ -65,7 +68,7 @@ def main():
     api_key = model_attribs['apikey']
     api_url = "https://kyllobrooks.com/api/mhs"
 
-    logging.INFO("Starting Task Manager...")
+    logging.info("Starting Task Manager...")
     task_manager = Task_Manager()
     while True:
 
@@ -97,12 +100,12 @@ def main():
         try:
             task_manager.do_Task(task, api_url, api_key, praw_obj)
         except:
-            logging.ERROR(f"UNABLE TO COMPLETE {task}")
+            logging.error(f"UNABLE TO COMPLETE: {task}")
             task.status = 3
             task.save()
             continue
         # at this point in the code we have a job object, do we want to do anything with it?
-        logging.info(f"Completed taskL {task}")
+        logging.info(f"Completed task: {task}")
         task.status = 2
         task.save()
 

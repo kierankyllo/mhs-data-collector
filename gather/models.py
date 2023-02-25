@@ -1,12 +1,6 @@
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 '''
-DONE:
-- Check ERD for correctness, https://drawsql.app/teams/kyllo-brooks-digital-services/diagrams/reddit-mhs-erd-2
-- Update all classes to ERD spec
-- Test migrations (PASSED in SqLite)
-- Queries to push to the database should serve as adequate testing
-- Freeze this code and push from gather service into test db using these classes
 TODO:
 - Run test queries and iterate
 LAST: 
@@ -66,7 +60,7 @@ class Inference_task(models.Model):
 
     def __str__(self):
         if (self.start_sched):
-            return f"Inference job scheduled: {self.start_sched}"
+            return f"Inference job {self.id} scheduled: {self.start_sched}"
  
 
 class Subreddit_result(models.Model):

@@ -9,10 +9,6 @@ COPY . /app
 # install wget
 RUN apt-get update && apt-get install --no-install-recommends -y wget
 
-# # fetch the cloud sql proxy
-# RUN wget https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 -O cloud_sql_proxy
-# RUN chmod +x cloud_sql_proxy
-
 # install loacl dependancies
 RUN pip install -r requirements.txt
 
