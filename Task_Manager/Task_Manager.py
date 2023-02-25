@@ -12,13 +12,6 @@ from gather.models import (Author_edge, Comment_result, Inference_task,
 from . import Subreddit_Data_Collector, commentData
 from .inferencer import Inferencer
 
-# TODO: build test scripts for the class
-# TODO: debug using 'issues' workflow
-# TODO: add terminal feedback about edge building and database pushing progress using tqdm
-# TODO: add error handling code
-# TODO: docstrings and code formatting compliance
-
-
 class Task_Manager():
     '''
     The `Task_Manager` class is a singleton responsible for processing a `task_object` and aggregating information
