@@ -5,28 +5,31 @@ import django
 import datetime
 import pytz
 import time
+import logging
 
-#TODO: further abstract away the settings fetching and secrets etc
-#TODO: incorporate into testing scripts
-#TODO: validate that the fetching logic is sound and what we need
-#TODO: add proper logging
-#TODO: add graceful shutdown
+# TODO: further abstract away the settings fetching and secrets etc
+# TODO: incorporate into testing scripts
+# TODO: validate that the fetching logic is sound and what we need
+# TODO: add proper logging
+# TODO: add graceful shutdown
 
-#TESTS:
+# TESTS:
 # - picks up task scheduled for now - PASS
 # - picks up task scheduled in past and executes immediately - PASS
 # - picks up task scheduled in future - PASS
 # - assigns proper status to tasks for each execution for each case
 
-                    # ('0', 'Scheduled'), - PASS
-                    # ('1', 'In Progress'), - PASS
-                    # ('2', 'Completed'), - PASS
-                    # ('3', 'Error'), - PASS
-                    # ('4', 'Cancelled') - 
+# ('0', 'Scheduled'), - PASS
+# ('1', 'In Progress'), - PASS
+# ('2', 'Completed'), - PASS
+# ('3', 'Error'), - PASS
+# ('4', 'Cancelled') -
+
+
 def main():
     '''
     This pseudo describes the main loop function of the Gather bot.  
-    
+
     now = now()
 
     FROM toxit_inference_task table as job
@@ -62,49 +65,47 @@ def main():
     api_key = model_attribs['apikey']
     api_url = "https://kyllobrooks.com/api/mhs"
 
-    # status message, replace with logging
-    print("Starting Task Manager...")
-
+    logging.INFO("Starting Task Manager...")
     task_manager = Task_Manager()
-
     while True:
 
         # fetch and construct praw object
         praw_obj = praw.Reddit(
-            client_id = keys['client_id'],
-            client_secret = keys['client_secret'],
-            password = keys['password'],
+            client_id=keys['client_id'],
+            client_secret=keys['client_secret'],
+            password=keys['password'],
             user_agent="web:mhs-crawler-bot:v1 (by /u/mhs-crawler-bot)",
             username="mhs-crawler-bot",
-            )
+        )
 
         # set readonly mode
         praw_obj.read_only = False
-        
+
         # when is now?
-        now = datetime.datetime.now(pytz.timezone('America/Regina'))        
+        now = datetime.datetime.now(pytz.timezone('America/Regina'))
 
         # try to fetch a task from the database
-        task = Inference_task.objects.filter(start_sched__lte=now, status=0).first()
+        task = Inference_task.objects.filter(
+            start_sched__lte=now, status=0).first()
         if task == None:
-            # debug message, dont log this
-            print('Task Manager is Idle...')
+            logging.debug('Task Manager is Idle...')
             time.sleep(10)
             continue
-        # log this
+        logging.info(f"Starting task: {task}")
         task.status = 1
         task.save()
         try:
             task_manager.do_Task(task, api_url, api_key, praw_obj)
         except:
-            # log this
+            logging.ERROR(f"UNABLE TO COMPLETE {task}")
             task.status = 3
             task.save()
             continue
         # at this point in the code we have a job object, do we want to do anything with it?
-        # log this
+        logging.info(f"Completed taskL {task}")
         task.status = 2
         task.save()
+
 
 if __name__ == '__main__':
     main()
