@@ -1,5 +1,6 @@
 from tqdm import tqdm
 import requests
+import logging
 from . import commentData
 
 
@@ -46,19 +47,13 @@ class Inferencer():
 
         """
         response = []
-
-        t = tqdm(total=len(comments), desc=f"Inference:")
         comment_text = [x.comment_body for x in comments]
-        for chunk in self.__chunker(comment_text, chunk_size):
-            for attempts in range(5):
-                try:
-                    res = self.__request_inference(chunk)
-                    response.extend(res['predictions'])
-                except requests.exceptions.HTTPError as e:
-                    print(f"{e}\nTrying {5-attempts} more times")
-                    continue
-                t.update(len(chunk))
-                break
+        for chunk in tqdm(self.__chunker(comment_text, chunk_size), desc=f"Inference:"):
+            data = self.__request_inference(chunk)
+            if (data == None):
+                logging.error("UNABLE TO PERFORM INFERENCE")
+                continue
+            response.extend(data['predictions'])
 
         response = self.__flatten(response)
         return self.__combineResults(comments, response)
@@ -72,9 +67,15 @@ class Inferencer():
     def __request_inference(self, data):
         payload = {"instances": data}
         headers = {"apikey": self.__apikey}
-        response = requests.post(
-            self.__url, json=payload, headers=headers)
-        return response.json()
+        for attempts in range(5):
+            try:
+                response = requests.post(
+                    self.__url, json=payload, headers=headers)
+                return response.json()
+            except requests.exceptions.HTTPError as e:
+                logging.warning(f"{e}\nTrying {5-attempts} more times")
+                continue
+        return None
 
     def __flatten(self, data):
         return [item for sublist in data for item in sublist]

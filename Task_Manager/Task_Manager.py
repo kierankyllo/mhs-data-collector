@@ -1,14 +1,16 @@
-import json
 import datetime
+import json
+import logging
+
 import numpy as np
 from tqdm import tqdm, trange
 
-from gather.models import (Comment_result, Inference_task, Subreddit,
-                           Subreddit_mod, Subreddit_result, Mod_edge, Author_edge)
+from gather.models import (Author_edge, Comment_result, Inference_task,
+                           Mod_edge, Subreddit, Subreddit_mod,
+                           Subreddit_result)
 
 from . import Subreddit_Data_Collector, commentData
 from .inferencer import Inferencer
-
 
 # TODO: build test scripts for the class
 # TODO: debug using 'issues' workflow
@@ -175,6 +177,7 @@ class Task_Manager():
                 })
 
             else:
+                logging.warning("Pushing data with no Inference results")
                 result.update({
                     sub:
                     Subreddit_result.objects.create(subreddit=subreddits[sub],
