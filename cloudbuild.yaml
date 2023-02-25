@@ -16,7 +16,7 @@ steps:
       - 'wget -O /workspace/cloud-sql-proxy https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v2.0.0/cloud-sql-proxy.linux.amd64 &&  chmod +x /workspace/cloud-sql-proxy'
 
 - id: test-with-proxy
-    name: 'gcr.io/cloud-builders/docker'
+    name: 'gcr.io/mhs-reddit/gather-bot-image'
     timeout: 100s
     entrypoint: sh
     args:
