@@ -43,6 +43,9 @@ class Task_Manager():
         return cls._instance
 
     def do_Task(self, task_object: Inference_task, api_url, api_key, praw_object, chunk_size=100) -> None:
+        task_object.status = 1
+        task_object.save()
+
         sdc = Subreddit_Data_Collector(praw_object)
 
         # get the comment data for all of the subs
@@ -95,7 +98,7 @@ class Task_Manager():
                      subs: dict[str, Subreddit_result],
                      mods: dict[str, set[str]],
                      authors: dict[str, set[str]]):
-        '''Wraps the edges discovered in the `__discover_edge()` method.'''
+        '''Pushes edges to the database.'''
 
         # Mods
         keys = list(subs.keys())
@@ -155,12 +158,11 @@ class Task_Manager():
                                 ) -> dict[str, Subreddit_result]:
         '''Saves the results for a Subreddit as a `Subreddit_result` model.'''
         result = {}
-        emptyList = []
         for sub in tqdm(allComments.keys(), desc="Pushing Subreddit Results"):
             # isolate the mhs results
             arr = [c.mhs_score for c in allComments[sub] if c.mhs_score != None]
 
-            if len(arr) < 0:
+            if len(arr) > 0:
                 arr = np.array(arr)
                 result.update({
                     sub:
@@ -171,7 +173,7 @@ class Task_Manager():
                                                     mean_result=arr.mean(),
                                                     std_result=arr.std(),
                                                     timestamp=datetime.datetime.now(),
-                                                    edges=json.dumps(emptyList))
+                                                    edges=json.dumps([]))
                 })
 
             else:
@@ -184,7 +186,7 @@ class Task_Manager():
                                                     mean_result=0.0,
                                                     std_result=0.0,
                                                     timestamp=datetime.datetime.now(),
-                                                    edges=json.dumps(emptyList))
+                                                    edges=json.dumps([]))
                 })
 
         return result
