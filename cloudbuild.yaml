@@ -9,7 +9,7 @@ steps:
   args: ['push', 'gcr.io/mhs-reddit/gather-bot-image']
 
 - id: proxy-install
-    name: alpine:3.10
+    name: 'alpine:3.10'
     entrypoint: sh
     args:
       - -c
