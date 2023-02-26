@@ -78,6 +78,12 @@ WSGI_APPLICATION = 'mysite.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
+
+if 'DB_HOST_ADDR' in os.environ:
+    db_host = os.environ['DB_HOST_ADDR']
+else:
+    db_host = 'localhost'
+
 DATABASES = {
     'default': {
 
@@ -85,7 +91,7 @@ DATABASES = {
         'NAME': 'mhs-init',
         'USER': fetch_secret('mhs_prod_db_username'),
         'PASSWORD': fetch_secret('mhs_prod_db_password'),
-        'HOST': 'localhost',
+        'HOST': db_host,
         'PORT': '5432',
         'TEST': {
             'NAME': 'mhs-test',
