@@ -1,4 +1,5 @@
 import os
+import json
 import praw
 import django
 import datetime
@@ -6,8 +7,7 @@ import pytz
 import time
 import logging
 import google.cloud.logging
-from Task_Manager import Task_Manager
-from gather.models import Inference_task
+
 from google.cloud import secretmanager
 
 # TODO: further abstract away the settings fetching and secrets etc
@@ -52,9 +52,11 @@ def main():
 
     '''
 
-    # copying how manage.py does it
+    # copying how manage.py does it for some reason we must import the libs here and not at the top
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mysite.settings')
     django.setup()
+    from Task_Manager import Task_Manager
+    from gather.models import Inference_task
 
     logging.info("Starting Task Manager...")
     task_manager = Task_Manager()
