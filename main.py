@@ -83,7 +83,9 @@ def main():
         if inference task fails
             set job.status = 3 and loop
 
+
     '''
+
     # copying how manage.py does it
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mysite.settings')
     django.setup()
