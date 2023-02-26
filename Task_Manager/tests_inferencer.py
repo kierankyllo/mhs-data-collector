@@ -8,12 +8,12 @@ from tqdm import tqdm
 
 from . import commentData
 from .inferencer import Inferencer
-
 from google.cloud import secretmanager
+
 
 def fetch_secret(secret_id):
     '''
-    This function returns a secret payload at runtime using the secure google secrets API
+    This utility function returns a secret payload at runtime using the secure google secrets API 
     '''
     client = secretmanager.SecretManagerServiceClient()
     name = f"projects/mhs-reddit/secrets/{secret_id}/versions/latest"

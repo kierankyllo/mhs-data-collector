@@ -14,12 +14,12 @@ from gather.models import (Author_edge, Comment_result, Inference_task,
                            Subreddit_result)
 from Task_Manager import Task_Manager
 from Task_Manager.Subreddit_Data_Collector import commentData
-
 from google.cloud import secretmanager
+
 
 def fetch_secret(secret_id):
     '''
-    This function returns a secret payload at runtime using the secure google secrets API 
+    This utility function returns a secret payload at runtime using the secure google secrets API 
     '''
     client = secretmanager.SecretManagerServiceClient()
     name = f"projects/mhs-reddit/secrets/{secret_id}/versions/latest"

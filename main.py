@@ -5,10 +5,10 @@ import datetime
 import pytz
 import time
 import logging
-from google.cloud import secretmanager
 import google.cloud.logging
 from Task_Manager import Task_Manager
 from gather.models import Inference_task
+from google.cloud import secretmanager
 
 # TODO: further abstract away the settings fetching and secrets etc
 # TODO: validate that the fetching logic is sound and what we need
@@ -17,9 +17,10 @@ from gather.models import Inference_task
 client = google.cloud.logging.Client()
 client.setup_logging()
 
+
 def fetch_secret(secret_id):
     '''
-    This function returns a secret payload at runtime using the secure google secrets API
+    This utility function returns a secret payload at runtime using the secure google secrets API 
     '''
     client = secretmanager.SecretManagerServiceClient()
     name = f"projects/mhs-reddit/secrets/{secret_id}/versions/latest"
