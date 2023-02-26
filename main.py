@@ -1,21 +1,19 @@
 import os
-import json
 import praw
 import django
 import datetime
 import pytz
 import time
 import logging
+from google.cloud import secretmanager
 import google.cloud.logging
-# setup google cloud logging handler
-client = google.cloud.logging.Client()
-client.setup_logging()
+from Task_Manager import Task_Manager
+from gather.models import Inference_task
 
 # TODO: further abstract away the settings fetching and secrets etc
 # TODO: incorporate into testing scripts
 # TODO: validate that the fetching logic is sound and what we need
 # TODO: add proper logging
-# TODO: add graceful shutdown
 
 # TESTS:
 # - picks up task scheduled for now - PASS
@@ -29,9 +27,44 @@ client.setup_logging()
 # ('3', 'Error'), - PASS
 # ('4', 'Cancelled') -
 
+# setup google cloud logging handler
+client = google.cloud.logging.Client()
+client.setup_logging()
+
+def fetch_secret(secret_id):
+    '''
+    This function returns a secret payload at runtime using the secure google secrets API
+    '''
+    client = secretmanager.SecretManagerServiceClient()
+    name = f"projects/mhs-reddit/secrets/{secret_id}/versions/latest"
+    response = client.access_secret_version(name=name)
+    return response.payload.data.decode('UTF-8')
+
+# setup api connection secret variables
+mhs_api_key = fetch_secret('mhs_api_key')
+mhs_api_url = fetch_secret('mhs_api_url')
+
+# setup praw secret variables
+praw_client_id = fetch_secret('praw_client_id')
+praw_client_secret = fetch_secret('praw_client_secret')
+praw_client_password = fetch_secret('praw_client_password')
+praw_user_agent = fetch_secret('praw_user_agent')
+praw_user_name = fetch_secret('praw_user_name ')
+
+# # setup api connection secret variables
+# mhs_api_key = 'G4F6p06vLrNzzeeIOzf0lANPhfqo0kKSVApcWbrZeaiUg9ijPeraNFipdryiqeG7'
+# mhs_api_url = 'https://kyllobrooks.com/api/mhs'
+
+# # setup praw secret variables
+# praw_client_id = 'dQiJXQTyBUWnddTM9lVOww'
+# praw_client_secret = 'yt74A2M71o98K0uH0A-MUIMdoDA6gw'
+# praw_client_password = 'n.uscJV;4E_3XnJ'
+# praw_user_agent = 'web:mhs-crawler-bot:v1 (by /u/mhs-crawler-bot)'
+# praw_user_name = 'mhs-crawler-bot'
+
 def main():
     '''
-    This pseudo describes the main loop function of the Gather bot.  
+    This pseudocode describes the main loop function of the Gather bot.  
 
     now = now()
 
@@ -45,28 +78,15 @@ def main():
         set job.status == 1
 
         if inference task succeeds
-            set job.status = 2
+            set job.status = 2 and loop
 
         if inference task fails
-            set job.status = 3
+            set job.status = 3 and loop
 
     '''
     # copying how manage.py does it
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mysite.settings')
     django.setup()
-    from Task_Manager import Task_Manager
-    from gather.models import Inference_task
-
-    # fetch the secrets from the keyfile
-    keysJSON = open('keys.json')
-    open_file = keysJSON.read()
-    model_attribs = json.loads(open_file)['model']
-    keys = json.loads(open_file)['reddit']
-    keysJSON.close()
-
-    # setup api connection variables
-    api_key = model_attribs['apikey']
-    api_url = "https://kyllobrooks.com/api/mhs"
 
     logging.info("Starting Task Manager...")
     task_manager = Task_Manager()
@@ -74,11 +94,11 @@ def main():
 
         # fetch and construct praw object
         praw_obj = praw.Reddit(
-            client_id=keys['client_id'],
-            client_secret=keys['client_secret'],
-            password=keys['password'],
-            user_agent="web:mhs-crawler-bot:v1 (by /u/mhs-crawler-bot)",
-            username="mhs-crawler-bot",
+            client_id=praw_client_id,
+            client_secret=praw_client_secret,
+            password=praw_client_password,
+            user_agent=praw_user_agent,
+            username=praw_user_name,
         )
 
         # set readonly mode
@@ -98,7 +118,7 @@ def main():
         task.status = 1
         task.save()
         try:
-            task_manager.do_Task(task, api_url, api_key, praw_obj)
+            task_manager.do_Task(task, mhs_api_url, mhs_api_key, praw_obj)
         except:
             logging.error(f"UNABLE TO COMPLETE: {task}")
             task.status = 3
