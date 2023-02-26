@@ -39,7 +39,7 @@ class TestTaskManager(TestCase):
             client_secret=fetch_secret('praw_client_secret'),
             password=fetch_secret('praw_client_password'),
             user_agent=fetch_secret('praw_user_agent'),
-            username=fetch_secret('praw_user_name ')
+            username=fetch_secret('praw_user_name')
         )
 
     @patch.object(Task_Manager, '_instance', None)
