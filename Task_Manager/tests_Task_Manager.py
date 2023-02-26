@@ -14,6 +14,17 @@ from gather.models import (Author_edge, Comment_result, Inference_task,
                            Subreddit_result)
 from Task_Manager import Task_Manager
 from Task_Manager.Subreddit_Data_Collector import commentData
+from google.cloud import secretmanager
+
+
+def fetch_secret(secret_id):
+    '''
+    This utility function returns a secret payload at runtime using the secure google secrets API 
+    '''
+    client = secretmanager.SecretManagerServiceClient()
+    name = f"projects/mhs-reddit/secrets/{secret_id}/versions/latest"
+    response = client.access_secret_version(name=name)
+    return response.payload.data.decode('UTF-8')
 
 
 class TestTaskManager(TestCase):
@@ -22,18 +33,13 @@ class TestTaskManager(TestCase):
         tqdm.__init__ = partialmethod(tqdm.__init__, disable=True)
         self.task_manager = Task_Manager()
         self.now = datetime.datetime.now
-        keysJSON = open('keys.json')
-        open_file = keysJSON.read()
-        self.model_attribs = json.loads(open_file)['model']
-        keys = json.loads(open_file)['reddit']
-        keysJSON.close()
 
         self.praw_obj = praw.Reddit(
-            client_id=keys['client_id'],
-            client_secret=keys['client_secret'],
-            password=keys['password'],
-            user_agent="web:mhs-crawler-bot:v1 (by /u/mhs-crawler-bot)",
-            username="mhs-crawler-bot",
+            client_id=fetch_secret('praw_client_id'),
+            client_secret=fetch_secret('praw_client_secret'),
+            password=fetch_secret('praw_client_password'),
+            user_agent=fetch_secret('praw_user_agent'),
+            username=fetch_secret('praw_user_name')
         )
 
     @patch.object(Task_Manager, '_instance', None)
@@ -122,19 +128,19 @@ class TestTaskManager(TestCase):
         self.assertGreater(saved_results[0].mean_result, 0)
         self.assertEqual(saved_results[1].inference_task, task)
 
-    # def test_fullRun(self) -> None:
-    #     sublist = ['programming', 'rpcs3', 'subnautica', 'formula1']
+    def test_fullRun(self) -> None:
+        sublist = ['programming', 'rpcs3', 'subnautica', 'formula1']
 
-    #     task_out = Inference_task.objects.create(start_sched=self.now(),
-    #                                              time_scale='week',
-    #                                              min_words=1,
-    #                                              forest_width=1,
-    #                                              per_post_n=100,
-    #                                              comments_n=10,
-    #                                              subreddit_set=sublist,
-    #                                              status='0',
-    #                                              )
-    #     tm = Task_Manager()
+        task_out = Inference_task.objects.create(start_sched=self.now(),
+                                                 time_scale='week',
+                                                 min_words=1,
+                                                 forest_width=1,
+                                                 per_post_n=100,
+                                                 comments_n=10,
+                                                 subreddit_set=sublist,
+                                                 status='0',
+                                                 )
+        tm = Task_Manager()
 
-    #     tm.do_Task(task_out, "https://kyllobrooks.com/api/mhs",
-    #                self.model_attribs['apikey'], self.praw_obj)
+        tm.do_Task(task_out, fetch_secret('mhs_api_url'),
+                   fetch_secret('mhs_api_key'), self.praw_obj)
