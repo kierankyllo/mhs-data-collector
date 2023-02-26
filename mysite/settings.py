@@ -26,10 +26,10 @@ def fetch_secret(secret_id):
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-u-hue90&8g&#*7lnan)w&c0%l-2n7pi5+)o^@!hy0y-uu!hp^u'
+SECRET_KEY = fetch_secret('django_secret_key')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = []
 
