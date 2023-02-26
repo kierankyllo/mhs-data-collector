@@ -9,16 +9,24 @@ from tqdm import tqdm
 from . import commentData
 from .inferencer import Inferencer
 
+from google.cloud import secretmanager
+
+def fetch_secret(secret_id):
+    '''
+    This function returns a secret payload at runtime using the secure google secrets API
+    '''
+    client = secretmanager.SecretManagerServiceClient()
+    name = f"projects/mhs-reddit/secrets/{secret_id}/versions/latest"
+    response = client.access_secret_version(name=name)
+    return response.payload.data.decode('UTF-8')
+
 
 class Inferencer_Test(TestCase):
     def setUp(self) -> None:
         # Silence tqdm while doing tests. Stolen from https://stackoverflow.com/questions/37091673/silence-tqdms-output-while-running-tests-or-running-the-code-via-cron
         tqdm.__init__ = partialmethod(tqdm.__init__, disable=True)
-        keysJSON = open('keys.json')
-        model_attribs = json.loads(keysJSON.read())['model']
-        keysJSON.close()
-        real_apikey = model_attribs['apikey']
-        real_url = "https://kyllobrooks.com/api/mhs"
+        real_apikey = fetch_secret('mhs_api_key')
+        real_url = fetch_secret('mhs_api_url')
         self.realInferencer = Inferencer(real_apikey, real_url)
         self.inferencer = Inferencer("test_apikey", "www.sample.com/")
 
