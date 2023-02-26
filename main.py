@@ -11,21 +11,7 @@ from Task_Manager import Task_Manager
 from gather.models import Inference_task
 
 # TODO: further abstract away the settings fetching and secrets etc
-# TODO: incorporate into testing scripts
 # TODO: validate that the fetching logic is sound and what we need
-# TODO: add proper logging
-
-# TESTS:
-# - picks up task scheduled for now - PASS
-# - picks up task scheduled in past and executes immediately - PASS
-# - picks up task scheduled in future - PASS
-# - assigns proper status to tasks for each execution for each case
-
-# ('0', 'Scheduled'), - PASS
-# ('1', 'In Progress'), - PASS
-# ('2', 'Completed'), - PASS
-# ('3', 'Error'), - PASS
-# ('4', 'Cancelled') -
 
 # setup google cloud logging handler
 client = google.cloud.logging.Client()
@@ -40,27 +26,6 @@ def fetch_secret(secret_id):
     response = client.access_secret_version(name=name)
     return response.payload.data.decode('UTF-8')
 
-# setup api connection secret variables
-mhs_api_key = fetch_secret('mhs_api_key')
-mhs_api_url = fetch_secret('mhs_api_url')
-
-# setup praw secret variables
-praw_client_id = fetch_secret('praw_client_id')
-praw_client_secret = fetch_secret('praw_client_secret')
-praw_client_password = fetch_secret('praw_client_password')
-praw_user_agent = fetch_secret('praw_user_agent')
-praw_user_name = fetch_secret('praw_user_name ')
-
-# # setup api connection secret variables
-# mhs_api_key = 'G4F6p06vLrNzzeeIOzf0lANPhfqo0kKSVApcWbrZeaiUg9ijPeraNFipdryiqeG7'
-# mhs_api_url = 'https://kyllobrooks.com/api/mhs'
-
-# # setup praw secret variables
-# praw_client_id = 'dQiJXQTyBUWnddTM9lVOww'
-# praw_client_secret = 'yt74A2M71o98K0uH0A-MUIMdoDA6gw'
-# praw_client_password = 'n.uscJV;4E_3XnJ'
-# praw_user_agent = 'web:mhs-crawler-bot:v1 (by /u/mhs-crawler-bot)'
-# praw_user_name = 'mhs-crawler-bot'
 
 def main():
     '''
@@ -96,11 +61,11 @@ def main():
 
         # fetch and construct praw object
         praw_obj = praw.Reddit(
-            client_id=praw_client_id,
-            client_secret=praw_client_secret,
-            password=praw_client_password,
-            user_agent=praw_user_agent,
-            username=praw_user_name,
+            client_id=fetch_secret('praw_client_id'),
+            client_secret=fetch_secret('praw_client_secret'),
+            password=fetch_secret('praw_client_password'),
+            user_agent=fetch_secret('praw_user_agent'),
+            username=fetch_secret('praw_user_name'),
         )
 
         # set readonly mode
@@ -120,7 +85,7 @@ def main():
         task.status = 1
         task.save()
         try:
-            task_manager.do_Task(task, mhs_api_url, mhs_api_key, praw_obj)
+            task_manager.do_Task(task, fetch_secret('mhs_api_url'), fetch_secret('mhs_api_key'), praw_obj)
         except:
             logging.error(f"UNABLE TO COMPLETE: {task}")
             task.status = 3
