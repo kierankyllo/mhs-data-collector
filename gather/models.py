@@ -47,8 +47,7 @@ class Inference_task(models.Model):
                                     help_text="The period overwhich the comments will be harvested")
     min_words = models.IntegerField(default=20, null=True, validators=[MinValueValidator(1), MaxValueValidator(168)],
                                     help_text="The minimum number of words to be considered a valid comment")
-    forest_width = models.IntegerField(default=10, validators=[MinValueValidator(0)],
-                                    help_text="The number of comments per level to be acquired")
+    forest_width = models.IntegerField(default=10, validators=[MinValueValidator(0)], help_text="[DEPRECIATED]")
     per_post_n = models.IntegerField(default=1000, validators=[MinValueValidator(1)],
                                     help_text="The maximum number of comments per post to be harvested")
     comments_n = models.IntegerField(default=1000, validators=[MinValueValidator(1)],
