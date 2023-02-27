@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from tqdm import tqdm
 import praw
+from praw.models import Submission
 
 
 @dataclass
@@ -44,29 +45,26 @@ class Subreddit_Data_Collector:
         return self.__praw.subreddit(display_name).id
 
     # constructor function to build comments list
-    def __fetch_content(self, name, posts, comments_n, min_words, forest_width, per_post_n):
-        t = tqdm(total=comments_n, desc=f"Collection: {name}")
-        result = []
-        for post in posts:
-            post.comments.replace_more(limit=forest_width)
-            comments = post.comments.list()
-            comment_tick = 0
-            for comment in comments:
-                if comment_tick >= per_post_n:
+    def __fetch_content(self, name: str, posts: list[Submission], comments_n: int, min_words: int, forest_width: int, per_post_n: int):
+        with tqdm(total=comments_n, desc=f"Collection: {name}") as t:
+            result = []
+            for post in posts:
+                post.comment_limit = per_post_n
+                post.comments.replace_more(limit=0)
+                comments = post.comments.list()
+                for comment in comments:
+                    if comment.author is not None and self.__count_words(comment.body) > min_words:
+                        t.update(1)
+                        data = commentData(comment_body=self.__sanitize(comment.body),
+                                           username=comment.author.name,
+                                           permalink=comment.permalink,
+                                           mhs_score=None,
+                                           edited=comment.edited)
+                        result.append(data)
+                        if len(result) == comments_n:
+                            break
+                if len(result) == comments_n:
                     break
-                if comment.author is not None and self.__count_words(comment.body) > min_words:
-                    t.update(1)
-                    data = commentData(comment_body=self.__sanitize(comment.body),
-                                       username=comment.author.name,
-                                       permalink=comment.permalink,
-                                       mhs_score=None,
-                                       edited=comment.edited)
-                    result.append(data)
-                    if len(result) == comments_n:
-                        break
-                    comment_tick += 1
-            if len(result) == comments_n:
-                break
         return result
 
     # defines a funtion to clean text in the strings from weird chars
