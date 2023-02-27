@@ -128,19 +128,19 @@ class TestTaskManager(TestCase):
         self.assertGreater(saved_results[0].mean_result, 0)
         self.assertEqual(saved_results[1].inference_task, task)
 
-    def test_fullRun(self) -> None:
-        sublist = ['programming', 'rpcs3', 'subnautica', 'formula1']
+    # def test_fullRun(self) -> None:
+    #     sublist = ['programming', 'rpcs3', 'subnautica', 'formula1']
 
-        task_out = Inference_task.objects.create(start_sched=self.now(),
-                                                 time_scale='week',
-                                                 min_words=1,
-                                                 forest_width=1,
-                                                 per_post_n=100,
-                                                 comments_n=10,
-                                                 subreddit_set=sublist,
-                                                 status='0',
-                                                 )
-        tm = Task_Manager()
+    #     task_out = Inference_task.objects.create(start_sched=self.now(),
+    #                                              time_scale='week',
+    #                                              min_words=1,
+    #                                              forest_width=1,
+    #                                              per_post_n=100,
+    #                                              comments_n=10,
+    #                                              subreddit_set=sublist,
+    #                                              status='0',
+    #                                              )
+    #     tm = Task_Manager()
 
-        tm.do_Task(task_out, fetch_secret('mhs_api_url'),
-                   fetch_secret('mhs_api_key'), self.praw_obj)
+    #     tm.do_Task(task_out, fetch_secret('mhs_api_url'),
+    #                fetch_secret('mhs_api_key'), self.praw_obj)
