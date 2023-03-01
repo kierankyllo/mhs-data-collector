@@ -7,4 +7,4 @@ Gather bot service for the MHS Reddit CS 476 Project
 * Full switch to prod db
 * Full secret rotation
 * Clean up and standardize formatting
-* Optimize things
+* Optimize
