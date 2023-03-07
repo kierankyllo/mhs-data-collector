@@ -30,7 +30,7 @@ class Subreddit_Data_Collector:
     def get_mod_set(self, display_name, includeAutoMod=False) -> set[str]:
         """Returns the moderators for the given subreddit"""
         subreddit = self.__praw.subreddit(display_name)
-        mods = {mod for mod in subreddit.moderator()
+        mods = {mod.name for mod in subreddit.moderator()
                 if mod.name != 'AutoModerator' or includeAutoMod}
         return mods
 
