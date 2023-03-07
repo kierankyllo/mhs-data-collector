@@ -87,7 +87,7 @@ DATABASES = {
     'default': {
 
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'mhs-init',
+        'NAME': 'mhs-prod',
         'USER': fetch_secret('mhs_prod_db_username'),
         'PASSWORD': fetch_secret('mhs_prod_db_password'),
         'HOST': db_host,
