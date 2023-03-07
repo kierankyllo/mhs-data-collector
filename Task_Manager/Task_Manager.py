@@ -79,7 +79,6 @@ class Task_Manager():
 
         all_Authors = {
             sub: sdc.get_author_set_from_comment_data(all_Comment_Data[sub])
-
             for sub in all_Comment_Data
         }
 
@@ -108,46 +107,32 @@ class Task_Manager():
         '''Pushes edges to the database.'''
 
         # Mods
-        keys = list(subs.keys())
+        keys = list(mods.keys())
         num_subreddits = len(keys)
-        mod_edges = []
+        edges = []
         for i in trange(num_subreddits, desc=f"Mod Edge Discovery:"):
             for j in range(i+1, num_subreddits):
                 A = mods[keys[i]]
                 B = mods[keys[j]]
                 weight = len(A.intersection(B))
                 if weight > 0:
-                    mod_edges.append(
+                    edges.append(
                         Mod_edge(from_sub=subs[keys[i]], to_sub=subs[keys[j]], inference_task=task, weight=weight))
 
-        Mod_edge.objects.bulk_create(mod_edges)
+        Mod_edge.objects.bulk_create(edges)
         # Authors
         keys = list(authors.keys())
         num_subreddits = len(keys)
-        author_edges = []
+        edges = []
         for i in trange(num_subreddits, desc=f"Author Edge Discovery:"):
             for j in range(i+1, num_subreddits):
                 A = authors[keys[i]]
                 B = authors[keys[j]]
                 weight = len(A.intersection(B))
                 if weight > 0:
-                    author_edges.append(
+                    edges.append(
                         Mod_edge(from_sub=subs[keys[i]], to_sub=subs[keys[j]], inference_task=task, weight=weight))
-
-        Author_edge.objects.bulk_create(author_edges)
-
-    def __create_edge(self, collection: dict[str, set[str]], context, subs: dict[str, Subreddit_result]) -> dict[str, dict[str, int]]:
-        '''Discovers edges between Subreddits based on Reddit authors or moderators.'''
-        keys = list(collection.keys())
-        num_subreddits = len(keys)
-        mod_edges = []
-        for i in trange(num_subreddits, desc=f"Edge Discovery: {context}"):
-            for j in range(i+1, num_subreddits):
-                A = collection[keys[i]]
-                B = collection[keys[j]]
-                edge = len(A.intersection(B))
-                if edge > 0:
-                    mod_edges.append(Mod_edge())
+        Author_edge.objects.bulk_create(edges)
 
     def __push_Subreddits(self, sdc: Subreddit_Data_Collector, subs: list[str]) -> None:
         subreddits = [
@@ -184,7 +169,8 @@ class Task_Manager():
                 })
 
             else:
-                logging.warning("Pushing data with no Inference results")
+                logging.warning(
+                    f"Pushing data for {sub} with no Inference results")
                 result.update({
                     sub:
                     Subreddit_result.objects.create(subreddit=subreddits[sub],
@@ -203,7 +189,6 @@ class Task_Manager():
         '''Saves the moderators for a Subreddit as `Subreddit_mod` models.'''
 
         for sub in tqdm(mod_list.keys(), desc="Pushing Mods"):
-
             mods = [Subreddit_mod(subreddit=subreddit[sub], username=mod, subreddit_result=result[sub])
                     for mod in mod_list[sub]]
             Subreddit_mod.objects.bulk_create(mods)
