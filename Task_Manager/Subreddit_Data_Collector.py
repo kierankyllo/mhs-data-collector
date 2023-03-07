@@ -27,11 +27,11 @@ class Subreddit_Data_Collector:
                                     forest_width=forest_width,
                                     per_post_n=per_post_n)
 
-    def get_mod_set(self, display_name, ignoreAutoMod=True) -> set[str]:
+    def get_mod_set(self, display_name, includeAutoMod=False) -> set[str]:
         """Returns the moderators for the given subreddit"""
         subreddit = self.__praw.subreddit(display_name)
         mods = {mod for mod in subreddit.moderator()
-                if mod.name != 'AutoModerator' and ignoreAutoMod}
+                if mod.name != 'AutoModerator' or includeAutoMod}
         return mods
 
     def get_author_set_from_comment_data(self, comments: dict[commentData]) -> set[str]:
