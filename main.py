@@ -6,6 +6,7 @@ import datetime
 import pytz
 import time
 import logging
+import traceback
 import google.cloud.logging
 
 from google.cloud import secretmanager
@@ -61,7 +62,6 @@ def main():
     logging.info("Starting Task Manager...")
     task_manager = Task_Manager()
     while True:
-
         # fetch and construct praw object
         praw_obj = praw.Reddit(
             client_id=fetch_secret('praw_client_id'),
@@ -88,9 +88,11 @@ def main():
         task.status = 1
         task.save()
         try:
-            task_manager.do_Task(task, fetch_secret('mhs_api_url'), fetch_secret('mhs_api_key'), praw_obj)
+            task_manager.do_Task(task, fetch_secret(
+                'mhs_api_url'), fetch_secret('mhs_api_key'), praw_obj)
         except:
             logging.error(f"UNABLE TO COMPLETE: {task}")
+            logging.error(traceback.format_exc())
             task.status = 3
             task.save()
             continue

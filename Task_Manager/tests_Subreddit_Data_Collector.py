@@ -24,8 +24,6 @@ class Inferencer_Test(TestCase):
     def setUp(self) -> None:
         # Silence tqdm while doing tests. Stolen from https://stackoverflow.com/questions/37091673/silence-tqdms-output-while-running-tests-or-running-the-code-via-cron
         tqdm.__init__ = partialmethod(tqdm.__init__, disable=True)
-        real_apikey = fetch_secret('mhs_api_key')
-        real_url = fetch_secret('mhs_api_url')
 
         self.praw_obj = praw.Reddit(
             client_id=fetch_secret('praw_client_id'),
@@ -37,7 +35,7 @@ class Inferencer_Test(TestCase):
 
         self.sdc = Subreddit_Data_Collector(self.praw_obj)
 
-    def AutoMod_Filter(self):
+    def Test_AutoMod_Filter(self):
         # get a subreddit that uses automod, might need to be changed if it starts to fail
         display_name = 'discordapp'
 
