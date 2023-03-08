@@ -71,6 +71,7 @@ class Subreddit_Data_Collector:
         item = item.replace('\\', '')
         item = item.replace('/', '')
         item = " ".join(item.split())
+        item = item.replace('\x00','')
         return item
 
     # defines a funtion to count words
