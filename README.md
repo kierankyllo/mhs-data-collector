@@ -1,4 +1,4 @@
-# MHS Reddit - Gather Bot
+# MHS Reddit - Data Collection Service
 Gather bot service for the MHS Reddit CS 476 Project
 
 ## TODO:
